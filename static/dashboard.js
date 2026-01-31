@@ -421,7 +421,12 @@ function renderAgentMessages(messages) {
     console.log(`[Dashboard] Rendering ${messages.length} messages`);
     
     // Helper to make messages friendlier
-    function friendlyMessage(msg) {
+    function friendlyMessage(msg, type) {
+        // Jarvis activity messages are already processed
+        if (type === 'jarvis_activity') {
+            return msg;
+        }
+        
         // Pattern: "Spawned subagent for task: xxx"
         const spawnMatch = msg.match(/Spawned subagent for task:\s*(.+)/i);
         if (spawnMatch) {
@@ -456,23 +461,43 @@ function renderAgentMessages(messages) {
             const from = msg.from || 'unknown';
             const to = msg.to || 'unknown';
             const message = msg.message || '';
+            const msgType = msg.type || '';
+            
+            // Check if this is a Jarvis activity message
+            const isJarvisActivity = msgType === 'jarvis_activity' || from === 'Jarvis';
             
             // Map to Friends names if applicable
             const fromName = from === 'Jarvis' ? 'Jarvis' : getFriendsName(from);
             const toName = to === 'Jarvis' ? 'Jarvis' : getFriendsName(to);
-            const friendlyMsg = friendlyMessage(message);
+            const friendlyMsg = friendlyMessage(message, msgType);
             
-            return `
-                <div class="mb-3 pb-3 border-b border-white/5 last:border-0">
-                    <div class="flex items-center gap-2 mb-1">
-                        <span class="text-xs text-modo-gray" title="${formatTime(timestamp)}">${formatFriendlyTime(timestamp)}</span>
-                        <span class="font-semibold text-modo-purple">${escapeHtml(fromName)}</span>
-                        <span class="text-modo-gray">→</span>
-                        <span class="font-semibold text-modo-blue">${escapeHtml(toName)}</span>
+            // Different styling for Jarvis vs sub-agents
+            if (isJarvisActivity) {
+                // Jarvis activity - distinct styling
+                return `
+                    <div class="mb-3 pb-3 border-b border-white/5 last:border-0 bg-purple-900/20 -mx-2 px-2 py-2 rounded">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="text-xs text-modo-gray" title="${formatTime(timestamp)}">${formatFriendlyTime(timestamp)}</span>
+                            <span class="font-semibold text-purple-400">🤖 Jarvis</span>
+                            <span class="text-xs px-1.5 py-0.5 rounded bg-purple-900/50 text-purple-300">working</span>
+                        </div>
+                        <p class="text-sm text-modo-text">${escapeHtml(friendlyMsg)}</p>
                     </div>
-                    <p class="text-sm text-modo-text">${escapeHtml(friendlyMsg)}</p>
-                </div>
-            `;
+                `;
+            } else {
+                // Sub-agent communication
+                return `
+                    <div class="mb-3 pb-3 border-b border-white/5 last:border-0">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="text-xs text-modo-gray" title="${formatTime(timestamp)}">${formatFriendlyTime(timestamp)}</span>
+                            <span class="font-semibold text-modo-purple">${escapeHtml(fromName)}</span>
+                            <span class="text-modo-gray">→</span>
+                            <span class="font-semibold text-modo-blue">${escapeHtml(toName)}</span>
+                        </div>
+                        <p class="text-sm text-modo-text">${escapeHtml(friendlyMsg)}</p>
+                    </div>
+                `;
+            }
         }).join('');
     } catch (err) {
         console.error('[Dashboard] Error rendering messages:', err);

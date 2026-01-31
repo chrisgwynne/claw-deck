@@ -50,6 +50,11 @@ COMMUNICATION_PATTERNS = {
         r"spawn.*agent",
         r"subagent.*spawned",
         r"(?:child|sub).*session.*started",
+    ],
+    "jarvis_activity": [
+        r"(?:implement|build|create|update|fix|refactor|working on|developing|adding|changing)",
+        r"(?:done|completed|finished)\s+(?:implement|build|update|fix)",
+        r"(?:will|gonna|going to)\s+(?:implement|build|create|update|fix)",
     ]
 }
 
@@ -162,9 +167,102 @@ def detect_communication_type(text: str) -> str | None:
     text_lower = text.lower()
     
     for msg_type, patterns in COMMUNICATION_PATTERNS.items():
+        # Skip jarvis_activity patterns - handled separately
+        if msg_type == "jarvis_activity":
+            continue
         for pattern in patterns:
             if re.search(pattern, text_lower):
                 return msg_type
+    
+    return None
+
+
+def get_tool_description(tool_name: str, args: dict) -> str | None:
+    """Generate a human-readable description of a tool call."""
+    # Skip internal/meta tools
+    if tool_name in ["sessions_list", "sessions_history", "session_status", "memory_search", "memory_get"]:
+        return None
+    
+    tool_descriptions = {
+        "edit": "Updated code",
+        "write": "Created new file",
+        "read": "Read file contents",
+        "exec": "Ran command",
+        "web_search": "Searched the web",
+        "web_fetch": "Fetched web content",
+        "browser": "Controlled browser",
+        "image": "Analyzed image",
+        "cron": "Managed scheduled task",
+        "message": "Sent message",
+        "sessions_spawn": None,  # Handled separately
+        "sessions_send": "Sent message to sub-agent",
+        "todoist": "Updated tasks",
+        "canvas": "Updated canvas",
+        "nodes": "Accessed device",
+        "whatsapp_login": "WhatsApp action",
+    }
+    
+    desc = tool_descriptions.get(tool_name)
+    if desc:
+        # Add context if available
+        if tool_name == "edit" and args.get("path"):
+            return f"{desc} in {args['path'].split('/')[-1]}"
+        if tool_name == "write" and args.get("file_path"):
+            return f"{desc}: {args['file_path'].split('/')[-1]}"
+        if tool_name == "exec" and args.get("command"):
+            cmd = args["command"][:30] + "..." if len(args["command"]) > 30 else args["command"]
+            return f"{desc}: {cmd}"
+        if tool_name == "web_search" and args.get("query"):
+            query = args["query"][:40] + "..." if len(args["query"]) > 40 else args["query"]
+            return f"{desc}: {query}"
+    
+    return desc
+
+
+def detect_jarvis_activity(text: str) -> str | None:
+    """Detect when Jarvis is actively working on something for the user."""
+    # Patterns indicating Jarvis is doing work
+    work_patterns = [
+        (r"(?:i'm|i am|ill|i'll)\s+(?:implement|build|create|update|fix|refactor|working on|developing|adding|changing|setting up)", "Working on implementation"),
+        (r"(?:let me|lemme)\s+(?:implement|build|create|update|fix|refactor|work on|develop|add|change|set up)", "Working on it"),
+        (r"(?:done|completed|finished)\s+(?:implement|build|update|fix|refactor|add|change)", "Completed implementation"),
+        (r"(?:will|gonna|going to)\s+(?:implement|build|create|update|fix|refactor|add|change|set up)", "Planning to implement"),
+        (r"(?:making|doing)\s+(?:changes|updates|fixes|modifications)", "Making changes"),
+        (r"(?:updating|fixing|adding|changing)\s+(?:the|your|this)", "Making updates"),
+        (r"(?:just|now)\s+(?:implemented|built|created|updated|fixed|refactored|added|changed)", "Just completed"),
+    ]
+    
+    text_lower = text.lower()
+    for pattern, summary in work_patterns:
+        if re.search(pattern, text_lower):
+            # Try to extract what specifically is being worked on
+            what_match = re.search(r"(?:implement|build|create|update|fix|add|change|set up)\s+(?:the\s+)?([^,.]+)", text_lower)
+            if what_match:
+                what = what_match.group(1).strip()[:50]
+                return f"{summary}: {what}"
+            return summary
+    
+    return None
+
+
+def detect_completion_statement(text: str) -> str | None:
+    """Detect when Jarvis is reporting completion of work."""
+    completion_patterns = [
+        r"(?:all\s+)?(?:done|complete|finished|ready)",
+        r"(?:here's|here is|ive|i've)\s+(?:implemented|built|created|updated|fixed|added|completed)",
+        r"(?:successfully|just)\s+(?:implemented|built|created|updated|fixed|added|completed)",
+    ]
+    
+    text_lower = text.lower()
+    for pattern in completion_patterns:
+        if re.search(pattern, text_lower):
+            # Check it's not a question
+            if "?" in text[:100]:
+                continue
+            # Extract first sentence as the completion message
+            first_sent = text.split(".")[0][:80] + "..." if len(text) > 80 else text.split(".")[0]
+            if len(first_sent) > 20:  # Only if substantial
+                return first_sent
     
     return None
 
@@ -318,6 +416,9 @@ def extract_messages_from_entry(
     msg_type = msg.get("type", "")
     timestamp = msg.get("timestamp", get_timestamp())
     
+    # Determine if this is the main agent (Jarvis) session
+    is_main_session = session_key.startswith("agent:main:main") or "main:main" in session_key
+    
     # Handle session spawn events (custom type in session transcripts)
     if msg_type == "custom" and msg.get("customType") == "model-snapshot":
         # This is a session start/spawn event
@@ -392,6 +493,39 @@ def extract_messages_from_entry(
                         "message": f"Spawned subagent: {task}" if task else "Spawned subagent",
                         "type": "spawn"
                     })
+                elif is_main_session:
+                    # Track Jarvis (main agent) tool usage as activity
+                    tool_desc = get_tool_description(tool_name, item.get("arguments", {}))
+                    if tool_desc:
+                        messages.append({
+                            "timestamp": timestamp,
+                            "from": "Jarvis",
+                            "to": "Chris",
+                            "message": tool_desc,
+                            "type": "jarvis_activity"
+                        })
+        
+        # For main session (Jarvis), also detect activity patterns in responses
+        if is_main_session and message_data.get("role") == "assistant":
+            activity = detect_jarvis_activity(full_text)
+            if activity:
+                messages.append({
+                    "timestamp": timestamp,
+                    "from": "Jarvis",
+                    "to": "Chris",
+                    "message": activity,
+                    "type": "jarvis_activity"
+                })
+            # Also detect task completions
+            completion = detect_completion_statement(full_text)
+            if completion:
+                messages.append({
+                    "timestamp": timestamp,
+                    "from": "Jarvis",
+                    "to": "Chris",
+                    "message": completion,
+                    "type": "jarvis_activity"
+                })
     
     return messages
 
