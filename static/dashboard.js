@@ -383,16 +383,23 @@ function renderAgents(sessions) {
         const idleMinutes = Math.round((s.idleMs || 0) / 60000);
         const idleText = s.status === 'IDLE' ? ` (${idleMinutes}m)` : '';
         
+        // Jarvis (main agent) gets purple styling
+        const isJarvis = s.isMain;
+        const nameColor = isJarvis ? 'text-purple-400' : (s.status === 'IDLE' ? 'text-gray-400' : 'text-white');
+        const metaColor = isJarvis ? 'text-purple-300' : (s.status === 'IDLE' ? 'text-gray-500' : 'text-modo-gray');
+        const badgeBg = isJarvis ? 'bg-purple-600' : s.statusColor;
+        const jarvisBadge = isJarvis ? '<span class="ml-1 text-xs px-1.5 py-0.5 rounded bg-purple-900/50 text-purple-300">Jarvis</span>' : '';
+        
         return `
-        <div class="${s.cardClass} rounded-lg p-4 border border-white/5 transition-all">
+        <div class="${s.cardClass} ${isJarvis ? 'border-purple-500/30' : ''} rounded-lg p-4 border border-white/5 transition-all">
             <div class="flex justify-between items-start mb-2">
                 <div>
-                    <h3 class="font-bold ${s.status === 'IDLE' ? 'text-gray-400' : 'text-white'}">${escapeHtml(s.friendsName)} ${s.isSubagent ? '<span class="text-xs text-modo-gray">(subagent)</span>' : ''}</h3>
-                    <span class="text-xs ${s.status === 'IDLE' ? 'text-gray-500' : 'text-modo-gray'}">${escapeHtml(model)} • ${escapeHtml(channel)}</span>
+                    <h3 class="font-bold ${nameColor}">${escapeHtml(s.friendsName)}${jarvisBadge}</h3>
+                    <span class="text-xs ${metaColor}">${escapeHtml(model)} • ${escapeHtml(channel)}</span>
                 </div>
-                <span class="px-2 py-1 rounded text-xs ${s.statusColor}">${s.status}${idleText}</span>
+                <span class="px-2 py-1 rounded text-xs ${badgeBg}">${s.status}${idleText}</span>
             </div>
-            <div class="text-xs ${s.status === 'IDLE' ? 'text-gray-500' : 'text-modo-gray'} space-y-1">
+            <div class="text-xs ${metaColor} space-y-1">
                 <p>Task: ${friendlyTaskName(s.label) || 'main'}</p>
                 <p>Tokens: ${(s.total_tokens || 0).toLocaleString()}</p>
                 ${s.context_usage_percent ? `<p>Context: ${s.context_usage_percent.toFixed(1)}%</p>` : ''}

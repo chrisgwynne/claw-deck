@@ -645,8 +645,32 @@ def collect_messages() -> list[dict]:
 
 
 def get_messages_for_api() -> list[dict]:
-    """Get current messages for the API response."""
-    return load_existing_messages()
+    """Get current messages for the API response (last 1 hour only)."""
+    from datetime import datetime, timedelta, timezone
+    
+    messages = load_existing_messages()
+    cutoff_time = datetime.now(timezone.utc) - timedelta(hours=1)
+    
+    filtered_messages = []
+    for msg in messages:
+        try:
+            msg_time_str = msg.get("timestamp", "")
+            # Parse ISO format timestamp
+            if msg_time_str:
+                # Handle various ISO formats
+                msg_time_str = msg_time_str.replace('Z', '+00:00')
+                msg_time = datetime.fromisoformat(msg_time_str)
+                # Ensure timezone-aware
+                if msg_time.tzinfo is None:
+                    msg_time = msg_time.replace(tzinfo=timezone.utc)
+                
+                if msg_time >= cutoff_time:
+                    filtered_messages.append(msg)
+        except (ValueError, TypeError):
+            # If we can't parse the timestamp, include it anyway
+            filtered_messages.append(msg)
+    
+    return filtered_messages
 
 
 if __name__ == "__main__":
