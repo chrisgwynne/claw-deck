@@ -328,15 +328,17 @@ function renderAgents(sessions) {
         return { ...s, friendsName, isSubagent, isMain, status, statusColor, cardClass, idleMs };
     }).filter(s => s.status !== 'HIDDEN');
     
-    // Update counts
-    const totalEl = document.getElementById('agent-total');
-    const activeEl = document.getElementById('agent-active');
-    const idleEl = document.getElementById('agent-idle');
-    const activeCount = categorizedSessions.filter(s => s.status === 'ACTIVE').length;
-    const idleCount = categorizedSessions.filter(s => s.status === 'IDLE').length;
-    if (totalEl) totalEl.textContent = categorizedSessions.length;
-    if (activeEl) activeEl.textContent = activeCount;
-    if (idleEl) idleEl.textContent = idleCount;
+    // Update System Health agent stats
+    const bossEl = document.getElementById('agent-boss');
+    const subagentsEl = document.getElementById('agent-subagents');
+    const idleTimeoutEl = document.getElementById('agent-idle-timeout');
+    
+    const subagentCount = categorizedSessions.filter(s => s.isSubagent && s.status !== 'IDLE').length;
+    const idleTimeoutCount = categorizedSessions.filter(s => s.isSubagent && s.status === 'IDLE').length;
+    
+    if (bossEl) bossEl.textContent = 'Jarvis';
+    if (subagentsEl) subagentsEl.textContent = subagentCount;
+    if (idleTimeoutEl) idleTimeoutEl.textContent = idleTimeoutCount;
     
     if (categorizedSessions.length === 0) {
         container.innerHTML = '<p class="text-modo-gray col-span-2">No active sessions</p>';
