@@ -23,6 +23,18 @@ ASSIGNMENT_LOG_FILE = '/home/chris/clawd/dashboard/kanban_assignments.jsonl'
 # Kanban columns
 KANBAN_COLUMNS = ['Inbox', 'Up Next', 'In Progress', 'In Review', 'Done']
 
+# Task categories
+CATEGORIES = ['Core', 'Ship', 'Build', 'Fix', 'Read']
+
+# Category colors for UI
+CATEGORY_COLORS = {
+    'Core': '#8B5CF6',   # Purple - infrastructure
+    'Ship': '#10B981',   # Green - revenue/deploy
+    'Build': '#3B82F6',  # Blue - new features
+    'Fix': '#EF4444',    # Red - bugs/issues
+    'Read': '#F59E0B'    # Orange - research
+}
+
 # Auto-clear Done tasks after this many hours
 DONE_AUTO_CLEAR_HOURS = 24
 
@@ -35,6 +47,31 @@ AGENT_KEYWORDS = {
 
 # Default agent type
 DEFAULT_AGENT_TYPE = 'general'
+
+# Friends TV show character names for sub-agents (66 characters)
+FRIENDS_NAMES = [
+    "Rachel", "Ross", "Monica", "Chandler", "Joey", "Phoebe",
+    "Mike", "David", "Janice", "Gunther", "Richard", "Emily",
+    "Carol", "Susan", "Ben", "Emma", "Jack", "Judy",
+    "Estelle", "Frank", "Alice", "Ursula", "Tag", "Paul",
+    "Pete", "Kate", "Julie", "Charlie", "Kathy", "Elizabeth",
+    "Eddie", "MrHeckles", "Treeger", "Geller", "Tribbiani", "Buffay",
+    "Green", "Bing", "Geller2", "Hannigan", "Tyler", "Stevens",
+    "Will", "Jill", "Tim", "Tom", "Steve", "Mark",
+    "Gary", "Amy", "Eric", "Bob", "Dan", "Sam",
+    "Neil", "Rob", "Sean", "Pat", "Kim", "Joy",
+    "Zoe", "Max", "Leo", "Zack", "Cody", "UglyNakedGuy"
+]
+
+def get_friends_name(session_key: str) -> str:
+    """Get a friendly Friends character name based on session key hash."""
+    if not session_key:
+        return None
+    
+    # Use hash of session key to deterministically pick a name
+    import hashlib
+    hash_val = int(hashlib.md5(session_key.encode()).hexdigest(), 16)
+    return FRIENDS_NAMES[hash_val % len(FRIENDS_NAMES)]
 
 
 def ensure_files():
@@ -214,7 +251,7 @@ def spawn_agent(agent_type: str, task_id: str, title: str, description: str) -> 
 
 def create_task(title: str, description: str = "", priority: str = "medium",
                 status: str = "Inbox", created_by: str = "Jarvis",
-                obsidian_link: str = None) -> tuple[bool, Optional[Dict], str]:
+                obsidian_link: str = None, category: str = None) -> tuple[bool, Optional[Dict], str]:
     """
     Create a new task.
     Returns (success, task_dict, message)
@@ -222,6 +259,14 @@ def create_task(title: str, description: str = "", priority: str = "medium",
     # Validate inputs
     if not title or not title.strip():
         return False, None, "Title is required"
+    
+    # Category is required
+    if not category or not category.strip():
+        return False, None, "Category is required. Must be one of: Core, Ship, Build, Fix, Read"
+    
+    category = category.strip()
+    if category not in CATEGORIES:
+        return False, None, f"Invalid category. Must be one of: {', '.join(CATEGORIES)}"
     
     if status not in KANBAN_COLUMNS:
         return False, None, f"Invalid status. Must be one of: {', '.join(KANBAN_COLUMNS)}"
@@ -240,6 +285,7 @@ def create_task(title: str, description: str = "", priority: str = "medium",
         "id": task_id,
         "title": title.strip(),
         "description": description.strip(),
+        "category": category,
         "status": status,
         "priority": priority,
         "created_at": datetime.datetime.now().isoformat(),

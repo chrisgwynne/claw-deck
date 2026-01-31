@@ -476,6 +476,7 @@ def create_kanban_task():
     status = data.get('status', 'Backlog')
     created_by = data.get('created_by', 'Jarvis')
     obsidian_link = data.get('obsidian_link')
+    category = data.get('category', '').strip()
     
     success, task, message = create_task(
         title=title,
@@ -483,7 +484,8 @@ def create_kanban_task():
         priority=priority,
         status=status,
         created_by=created_by,
-        obsidian_link=obsidian_link
+        obsidian_link=obsidian_link,
+        category=category
     )
     
     if success:

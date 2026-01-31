@@ -9,6 +9,37 @@ let dragSourceElement = null;
 let deleteTaskId = null;
 let autoModeEnabled = true;
 
+// Friends TV show character names for sub-agents (66 characters)
+const FRIENDS_NAMES = [
+    "Rachel", "Ross", "Monica", "Chandler", "Joey", "Phoebe",
+    "Mike", "David", "Janice", "Gunther", "Richard", "Emily",
+    "Carol", "Susan", "Ben", "Emma", "Jack", "Judy",
+    "Estelle", "Frank", "Alice", "Ursula", "Tag", "Paul",
+    "Pete", "Kate", "Julie", "Charlie", "Kathy", "Elizabeth",
+    "Eddie", "MrHeckles", "Treeger", "Geller", "Tribbiani", "Buffay",
+    "Green", "Bing", "Geller2", "Hannigan", "Tyler", "Stevens",
+    "Will", "Jill", "Tim", "Tom", "Steve", "Mark",
+    "Gary", "Amy", "Eric", "Bob", "Dan", "Sam",
+    "Neil", "Rob", "Sean", "Pat", "Kim", "Joy",
+    "Zoe", "Max", "Leo", "Zack", "Cody", "UglyNakedGuy"
+];
+
+// Get a friendly Friends character name based on session key
+function getFriendsName(sessionKey) {
+    if (!sessionKey) return null;
+    
+    // Simple hash function to deterministically pick a name
+    let hash = 0;
+    for (let i = 0; i < sessionKey.length; i++) {
+        const char = sessionKey.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash; // Convert to 32bit integer
+    }
+    
+    const index = Math.abs(hash) % FRIENDS_NAMES.length;
+    return FRIENDS_NAMES[index];
+}
+
 // Status mapping between frontend and backend
 const STATUS_MAP = {
     'inbox': 'Inbox',
@@ -102,6 +133,42 @@ async function loadDashboardData() {
     }
 }
 
+// Friends character names for session key mapping (must match message_collector.py)
+const FRIENDS_CHARACTERS = [
+    "Rachel", "Monica", "Phoebe", "Joey", "Chandler", "Ross",
+    "Gunther", "Janice", "Mike", "David", "Richard", "Pete", "Tag", "Paul",
+    "Emily", "Carol", "Susan", "Ben", "Emma", "Jack", "Judy", "Leonard",
+    "Sandra", "Frank", "Alice", "Ursula", "Estelle", "Eddie", "Barry",
+    "MrHeckles", "Treeger", "Joshua", "Mindy", "Kathy", "Charlie", "Elizabeth",
+    "Paolo", "Julie", "FunBobby", "Gary", "Larry", "Vince", "Jason", "Duncan",
+    "Terry", "Joanna", "Gavin", "MrZelner", "Kim", "Nora", "Hugsy",
+    "Jill", "Amy", "NoraBing", "Helena", "Charles", "Bitsy", "Theodore",
+    "Drake", "Marcel", "Russ", "Danny", "Roy", "Stu", "Doug",
+    "UglyNakedGuy", "Lowell", "Bob", "Gandalf", "Hoshi", "DrRemore"
+];
+
+function getFriendsName(sessionKey) {
+    if (!sessionKey) return 'Unknown';
+    if (sessionKey.includes('main:main')) return 'Jarvis';
+    if (sessionKey.includes('subagent') || sessionKey.includes('cron')) {
+        // Generate consistent Friends name from session key
+        let hash = 0;
+        for (let i = 0; i < sessionKey.length; i++) {
+            hash = ((hash << 5) - hash) + sessionKey.charCodeAt(i);
+            hash = hash & hash; // Convert to 32bit integer
+        }
+        const index = Math.abs(hash) % FRIENDS_CHARACTERS.length;
+        return FRIENDS_CHARACTERS[index];
+    }
+    return sessionKey.split(':').pop().slice(0, 20);
+}
+
+// Helper to make task names friendlier
+function friendlyTaskName(label) {
+    if (!label) return null;
+    return label.replace(/-/g, ' ').replace(/_/g, ' ');
+}
+
 function renderDashboard(data) {
     // System Health
     renderSystemHealth(data.system, data);
@@ -113,7 +180,7 @@ function renderDashboard(data) {
     renderAgentMessages(data.messages || []);
     
     // Git Activity
-    renderGitActivity(data.git?.commits || []);
+    renderGitActivity(data.git || {});
     
     // Success Rate (real agent completion rate)
     updateSuccessRate(data);
@@ -252,35 +319,81 @@ function renderAgents(sessions) {
     const container = document.getElementById('agent-cards');
     if (!container) return;
     
+    // Filter and categorize sessions
+    const now = new Date();
+    const ACTIVE_THRESHOLD_MS = 10 * 60 * 1000; // 10 minutes
+    const IDLE_THRESHOLD_MS = 15 * 60 * 1000; // 15 minutes (hide after this)
+    
+    const categorizedSessions = sessions.map(s => {
+        const friendsName = getFriendsName(s.session_key);
+        const isSubagent = s.session_key?.includes('subagent');
+        const isMain = s.session_key === 'agent:main:main';
+        
+        // Calculate idle time
+        let idleMs = Infinity;
+        if (s.last_updated) {
+            const lastUpdate = new Date(s.last_updated);
+            idleMs = now - lastUpdate;
+        }
+        
+        // Determine status
+        let status, statusColor, cardClass;
+        if (isMain) {
+            status = 'ACTIVE';
+            statusColor = 'bg-green-600';
+            cardClass = 'bg-modo-card';
+        } else if (idleMs > IDLE_THRESHOLD_MS) {
+            status = 'HIDDEN';
+            statusColor = '';
+            cardClass = '';
+        } else if (idleMs > ACTIVE_THRESHOLD_MS) {
+            status = 'IDLE';
+            statusColor = 'bg-gray-600';
+            cardClass = 'bg-gray-800/50 border-gray-700';
+        } else {
+            status = 'ACTIVE';
+            statusColor = 'bg-green-600';
+            cardClass = 'bg-modo-card';
+        }
+        
+        return { ...s, friendsName, isSubagent, isMain, status, statusColor, cardClass, idleMs };
+    }).filter(s => s.status !== 'HIDDEN');
+    
     // Update counts
     const totalEl = document.getElementById('agent-total');
     const activeEl = document.getElementById('agent-active');
-    if (totalEl) totalEl.textContent = sessions.length;
-    if (activeEl) activeEl.textContent = sessions.filter(s => s.total_tokens > 0 || s.channel !== 'unknown').length;
+    const activeCount = categorizedSessions.filter(s => s.status === 'ACTIVE').length;
+    if (totalEl) totalEl.textContent = categorizedSessions.length;
+    if (activeEl) activeEl.textContent = activeCount;
     
-    if (sessions.length === 0) {
+    if (categorizedSessions.length === 0) {
         container.innerHTML = '<p class="text-modo-gray col-span-2">No active sessions</p>';
         return;
     }
     
-    container.innerHTML = sessions.map(s => {
-        const status = s.total_tokens > 100 ? 'ACTIVE' : 'IDLE';
-        const statusColor = status === 'ACTIVE' ? 'bg-green-600' : 'bg-gray-600';
+    // Sort: Active first, then Idle, then by last updated
+    categorizedSessions.sort((a, b) => {
+        if (a.status !== b.status) return a.status === 'ACTIVE' ? -1 : 1;
+        return (a.idleMs || 0) - (b.idleMs || 0);
+    });
+    
+    container.innerHTML = categorizedSessions.map(s => {
         const model = s.model || 'unknown';
         const channel = s.channel || 'unknown';
-        const label = s.label || 'main';
+        const idleMinutes = Math.round((s.idleMs || 0) / 60000);
+        const idleText = s.status === 'IDLE' ? ` (${idleMinutes}m)` : '';
         
         return `
-        <div class="bg-modo-card rounded-lg p-4 border border-white/5">
+        <div class="${s.cardClass} rounded-lg p-4 border border-white/5 transition-all">
             <div class="flex justify-between items-start mb-2">
                 <div>
-                    <h3 class="font-bold text-white">${escapeHtml(label)}</h3>
-                    <span class="text-xs text-modo-gray">${escapeHtml(model)} • ${escapeHtml(channel)}</span>
+                    <h3 class="font-bold ${s.status === 'IDLE' ? 'text-gray-400' : 'text-white'}">${escapeHtml(s.friendsName)} ${s.isSubagent ? '<span class="text-xs text-modo-gray">(subagent)</span>' : ''}</h3>
+                    <span class="text-xs ${s.status === 'IDLE' ? 'text-gray-500' : 'text-modo-gray'}">${escapeHtml(model)} • ${escapeHtml(channel)}</span>
                 </div>
-                <span class="px-2 py-1 rounded text-xs ${statusColor}">${status}</span>
+                <span class="px-2 py-1 rounded text-xs ${s.statusColor}">${s.status}${idleText}</span>
             </div>
-            <div class="text-xs text-modo-gray space-y-1">
-                <p>ID: ${s.session_id?.slice(0, 8) || '???'}...</p>
+            <div class="text-xs ${s.status === 'IDLE' ? 'text-gray-500' : 'text-modo-gray'} space-y-1">
+                <p>Task: ${friendlyTaskName(s.label) || 'main'}</p>
                 <p>Tokens: ${(s.total_tokens || 0).toLocaleString()}</p>
                 ${s.context_usage_percent ? `<p>Context: ${s.context_usage_percent.toFixed(1)}%</p>` : ''}
             </div>
@@ -307,6 +420,30 @@ function renderAgentMessages(messages) {
     
     console.log(`[Dashboard] Rendering ${messages.length} messages`);
     
+    // Helper to make messages friendlier
+    function friendlyMessage(msg) {
+        // Pattern: "Spawned subagent for task: xxx"
+        const spawnMatch = msg.match(/Spawned subagent for task:\s*(.+)/i);
+        if (spawnMatch) {
+            const task = spawnMatch[1];
+            // Make task name more readable
+            const readableTask = friendlyTaskName(task);
+            return `asked me to help with: ${readableTask}`;
+        }
+        
+        // Pattern: "delegat/assign/hand off"
+        if (/delegat|assign|hand off/i.test(msg)) {
+            return `passed work to me`;
+        }
+        
+        // Pattern: completed/finished
+        if (/completed|finished|done/i.test(msg)) {
+            return `finished up`;
+        }
+        
+        return msg;
+    }
+    
     try {
         container.innerHTML = messages.slice(-20).map((msg, index) => {
             // Validate message fields
@@ -320,15 +457,20 @@ function renderAgentMessages(messages) {
             const to = msg.to || 'unknown';
             const message = msg.message || '';
             
+            // Map to Friends names if applicable
+            const fromName = from === 'Jarvis' ? 'Jarvis' : getFriendsName(from);
+            const toName = to === 'Jarvis' ? 'Jarvis' : getFriendsName(to);
+            const friendlyMsg = friendlyMessage(message);
+            
             return `
                 <div class="mb-3 pb-3 border-b border-white/5 last:border-0">
                     <div class="flex items-center gap-2 mb-1">
-                        <span class="text-xs text-modo-gray">${formatTime(timestamp)}</span>
-                        <span class="font-semibold text-modo-purple">${escapeHtml(from)}</span>
+                        <span class="text-xs text-modo-gray" title="${formatTime(timestamp)}">${formatFriendlyTime(timestamp)}</span>
+                        <span class="font-semibold text-modo-purple">${escapeHtml(fromName)}</span>
                         <span class="text-modo-gray">→</span>
-                        <span class="font-semibold text-modo-blue">${escapeHtml(to)}</span>
+                        <span class="font-semibold text-modo-blue">${escapeHtml(toName)}</span>
                     </div>
-                    <p class="text-sm text-modo-text">${escapeHtml(message)}</p>
+                    <p class="text-sm text-modo-text">${escapeHtml(friendlyMsg)}</p>
                 </div>
             `;
         }).join('');
@@ -338,25 +480,86 @@ function renderAgentMessages(messages) {
     }
 }
 
-function renderGitActivity(commits) {
+function renderGitActivity(data) {
     const container = document.getElementById('git-activity');
     if (!container) return;
     
-    if (commits.length === 0) {
-        container.innerHTML = '<p class="text-modo-gray text-sm">No recent commits</p>';
+    const projects = data?.projects || [];
+    
+    if (projects.length === 0) {
+        container.innerHTML = '<p class="text-modo-gray text-sm">No project repos found</p>';
         return;
     }
     
-    container.innerHTML = commits.slice(0, 10).map(c => `
-        <div class="mb-3 pb-3 border-b border-white/5 last:border-0">
-            <div class="flex items-center gap-2 mb-1">
-                <span class="font-mono text-xs bg-modo-nav px-2 py-0.5 rounded text-modo-text">${c.short_hash || c.hash?.slice(0,7) || '????'}</span>
-                <span class="text-xs text-modo-purple">${escapeHtml(c.author || 'Unknown')}</span>
-                <span class="text-xs text-modo-gray">${c.relative_time || ''}</span>
-            </div>
-            <p class="text-sm text-modo-text">${escapeHtml(c.message || 'No message')}</p>
-        </div>
-    `).join('');
+    let html = '';
+    
+    projects.forEach(project => {
+        const commits = project.commits || [];
+        const uncommittedFiles = project.uncommitted_files || [];
+        const branch = project.branch || 'main';
+        
+        // Project header with emoji
+        const projectEmoji = project.name === 'Claw Deck' ? '🎨' : '🌐';
+        
+        html += `
+            <div class="mb-4 pb-3 border-b border-white/10 last:border-0">
+                <div class="flex items-center justify-between mb-2">
+                    <h4 class="text-modo-blue font-medium text-sm">${projectEmoji} ${escapeHtml(project.name)}</h4>
+                    <span class="text-xs text-gray-500">${branch}</span>
+                </div>
+        `;
+        
+        // Uncommitted changes
+        if (uncommittedFiles.length > 0) {
+            html += `
+                <div class="mb-3 p-2 bg-modo-orange/10 border border-modo-orange/30 rounded">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-modo-orange text-xs font-medium">📝 Uncommitted (${uncommittedFiles.length})</span>
+                    </div>
+                    <div class="space-y-1 max-h-24 overflow-y-auto">
+                        ${uncommittedFiles.slice(0, 8).map(f => `
+                            <div class="flex items-center gap-2 text-xs">
+                                <span class="text-gray-400 w-16">${f.status}</span>
+                                <span class="text-modo-text truncate">${escapeHtml(f.filename)}</span>
+                            </div>
+                        `).join('')}
+                        ${uncommittedFiles.length > 8 ? `<div class="text-xs text-gray-500 mt-1">+${uncommittedFiles.length - 8} more...</div>` : ''}
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Commits
+        if (commits.length > 0) {
+            html += `
+                <div class="space-y-2">
+                    ${commits.slice(0, 5).map(c => `
+                        <div class="pb-2 border-b border-white/5 last:border-0">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="font-mono text-xs bg-modo-nav px-2 py-0.5 rounded text-modo-text">${c.short_hash || c.hash?.slice(0,7) || '????'}</span>
+                                <span class="text-xs text-modo-purple">${escapeHtml(c.author || 'Unknown')}</span>
+                                <span class="text-xs text-modo-gray">${c.relative_time || ''}</span>
+                            </div>
+                            <p class="text-sm text-modo-text">${escapeHtml(c.message || 'No message')}</p>
+                            ${c.files_changed > 0 ? `
+                                <div class="text-xs text-gray-500 mt-1">
+                                    ${c.files_changed} file${c.files_changed !== 1 ? 's' : ''}
+                                    ${c.insertions > 0 ? `<span class="text-green-400">+${c.insertions}</span>` : ''}
+                                    ${c.deletions > 0 ? `<span class="text-red-400">-${c.deletions}</span>` : ''}
+                                </div>
+                            ` : ''}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        } else {
+            html += `<p class="text-xs text-gray-500">No recent commits</p>`;
+        }
+        
+        html += `</div>`;
+    });
+    
+    container.innerHTML = html || '<p class="text-modo-gray text-sm">No recent activity</p>';
 }
 
 function formatTime(dateStr) {
@@ -701,6 +904,15 @@ function renderKanban(tasks) {
     });
 }
 
+// Category colors
+const CATEGORY_COLORS = {
+    'Core': { bg: 'bg-purple-900/50', text: 'text-purple-300', border: 'border-purple-700' },
+    'Ship': { bg: 'bg-green-900/50', text: 'text-green-300', border: 'border-green-700' },
+    'Build': { bg: 'bg-blue-900/50', text: 'text-blue-300', border: 'border-blue-700' },
+    'Fix': { bg: 'bg-red-900/50', text: 'text-red-300', border: 'border-red-700' },
+    'Read': { bg: 'bg-orange-900/50', text: 'text-orange-300', border: 'border-orange-700' }
+};
+
 function renderTaskCard(task) {
     // Task card styling per specification:
     // - Background: #1A1F2E (modo-card)
@@ -724,15 +936,27 @@ function renderTaskCard(task) {
         statusDotGlow = 'shadow-[0_0_8px_rgba(251,191,36,0.6)]';
     }
     
-    // Agent assignment indicator
+    // Category badge
+    let categoryHtml = '';
+    if (task.category) {
+        const colors = CATEGORY_COLORS[task.category] || CATEGORY_COLORS['Core'];
+        categoryHtml = `
+            <span class="px-2 py-0.5 rounded text-xs font-medium ${colors.bg} ${colors.text} border ${colors.border}">
+                ${escapeHtml(task.category)}
+            </span>
+        `;
+    }
+    
+    // Agent assignment indicator - show friendly Friends name
     let agentHtml = '';
     if (task.assigned_agent) {
+        const friendsName = getFriendsName(task.session_key) || task.assigned_agent;
         agentHtml = `
-            <div class="flex items-center gap-1 text-emerald-400 text-xs" title="Assigned to: ${escapeHtml(task.assigned_agent)}">
+            <div class="flex items-center gap-1 text-emerald-400 text-xs" title="Assigned to: ${escapeHtml(friendsName)} (${escapeHtml(task.assigned_agent)})">
                 <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
                 </svg>
-                <span class="truncate max-w-[60px]">${escapeHtml(task.assigned_agent)}</span>
+                <span class="truncate max-w-[80px]">${escapeHtml(friendsName)}</span>
             </div>
         `;
     } else if (task.auto_assigning) {
@@ -763,9 +987,12 @@ function renderTaskCard(task) {
             </div>
             ${task.description ? `<p class="text-gray-500 text-xs mb-3 line-clamp-2">${escapeHtml(task.description)}</p>` : ''}
             
-            <!-- Status dot based on task state -->
-            <div class="flex items-center gap-1.5">
-                <span class="w-2 h-2 rounded-full ${statusDotColor} ${statusDotGlow}"></span>
+            <!-- Category badge and Agent -->
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full ${statusDotColor} ${statusDotGlow}"></span>
+                    ${categoryHtml}
+                </div>
                 ${agentHtml || '<span class="text-xs text-gray-600">Unassigned</span>'}
             </div>
         </div>
@@ -910,13 +1137,28 @@ function openTaskViewModal(taskId) {
     // Priority
     document.getElementById('view-task-priority').textContent = task.priority || 'Medium';
     
-    // Assigned Agent
+    // Category with color coding
+    const categoryEl = document.getElementById('view-task-category');
+    if (task.category) {
+        const colors = CATEGORY_COLORS[task.category] || CATEGORY_COLORS['Core'];
+        categoryEl.innerHTML = `
+            <span class="px-2 py-0.5 rounded text-xs font-medium ${colors.bg} ${colors.text} border ${colors.border}">
+                ${escapeHtml(task.category)}
+            </span>
+        `;
+    } else {
+        categoryEl.textContent = '—';
+    }
+    
+    // Assigned Agent (with friendly Friends name)
     const assignedContainer = document.getElementById('view-task-assigned-container');
     const assignedEl = document.getElementById('view-task-assigned');
     if (task.assigned_agent) {
+        const friendsName = getFriendsName(task.session_key) || task.assigned_agent;
         assignedEl.innerHTML = `
             <span class="text-emerald-400">🤖</span>
-            <span class="text-emerald-400 font-medium">${escapeHtml(task.assigned_agent)}</span>
+            <span class="text-emerald-400 font-medium">${escapeHtml(friendsName)}</span>
+            <span class="text-gray-500 text-xs">(${escapeHtml(task.assigned_agent)})</span>
         `;
         assignedContainer.classList.remove('hidden');
     } else {
@@ -990,6 +1232,7 @@ function openTaskModal(taskId = null) {
             document.getElementById('task-title').value = task.title || '';
             document.getElementById('task-description').value = task.description || '';
             document.getElementById('task-priority').value = task.priority || 'medium';
+            document.getElementById('task-category').value = task.category || '';
         }
     } else {
         titleEl.textContent = 'New Task';
@@ -1012,12 +1255,18 @@ async function handleTaskSubmit(e) {
     const taskData = {
         title: document.getElementById('task-title').value.trim(),
         description: document.getElementById('task-description').value.trim(),
+        category: document.getElementById('task-category').value,
         priority: document.getElementById('task-priority').value,
         status: 'Inbox'
     };
     
     if (!taskData.title) {
         showNotification('Title is required', 'error');
+        return;
+    }
+    
+    if (!taskData.category) {
+        showNotification('Category is required', 'error');
         return;
     }
     

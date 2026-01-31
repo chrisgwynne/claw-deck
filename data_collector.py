@@ -28,6 +28,16 @@ CONFIG = {
     "max_memory_files": 20,
 }
 
+# Project repos to track for Git Activity
+PROJECT_REPOS = [
+    {"name": "Claw Deck", "path": "/home/chris/clawd/dashboard", "repo_name": "claw-deck"},
+    {"name": "Website", "path": "/home/chris/clawd/website", "repo_name": "website"},
+]
+
+# Success tracking
+SUCCESS_LOG_FILE = '/home/chris/clawd/dashboard/agent_success_log.jsonl'
+IDLE_TIMEOUT_MINUTES = 30
+
 
 def get_timestamp() -> str:
     """Get current UTC timestamp in ISO format."""
@@ -139,10 +149,11 @@ def parse_memory_files() -> dict[str, Any]:
     memory_data = {
         "timestamp": get_timestamp(),
         "recent_files": [],
+        "total_memory_files": 0,
         "task_summary": {
             "total_tasks": 0,
             "completed_tasks": 0,
-            "in_progress_tasks": 0,
+            "in_progress_tasks": 0
         },
         "errors": []
     }
@@ -152,7 +163,7 @@ def parse_memory_files() -> dict[str, Any]:
             memory_data["errors"].append("Memory directory not found")
             return memory_data
         
-        # Get all .md files sorted by modification time (newest first)
+        # Get all .md files in memory directory
         memory_files = []
         for f in os.listdir(CONFIG["memory_dir"]):
             if f.endswith('.md'):
@@ -161,43 +172,47 @@ def parse_memory_files() -> dict[str, Any]:
                     stat = os.stat(filepath)
                     memory_files.append({
                         "filename": f,
-                        "filepath": filepath,
-                        "mtime": stat.st_mtime,
+                        "path": filepath,
+                        "modified": stat.st_mtime,
                         "size": stat.st_size
                     })
                 except Exception:
-                    pass
+                    continue
         
         # Sort by modification time (newest first)
-        memory_files.sort(key=lambda x: x["mtime"], reverse=True)
+        memory_files.sort(key=lambda x: x["modified"], reverse=True)
+        memory_data["total_memory_files"] = len(memory_files)
         
         # Parse recent files
         recent_files = []
         for mem_file in memory_files[:CONFIG["max_memory_files"]]:
             try:
-                with open(mem_file["filepath"], 'r', encoding='utf-8', errors='ignore') as f:
+                with open(mem_file["path"], 'r') as f:
                     content = f.read()
                 
                 file_data = {
                     "filename": mem_file["filename"],
                     "modified": datetime.fromtimestamp(
-                        mem_file["mtime"], timezone.utc
+                        mem_file["modified"], timezone.utc
                     ).isoformat(),
                     "size_bytes": mem_file["size"],
-                    "has_session_header": "# Session:" in content or "## Session" in content,
-                    "has_tasks": "- [ ]" in content or "- [x]" in content,
-                    "task_count": content.count("- [ ]") + content.count("- [x]"),
-                    "completed_count": content.count("- [x]"),
-                    "open_loops_count": content.count("### Open Loops"),
-                    "decisions_count": content.count("### Decisions"),
-                    "summary": None
+                    "task_count": content.lower().count("- [ ]") + content.lower().count("- [x]"),
+                    "completed_count": content.lower().count("- [x]"),
+                    "summary": ""
                 }
                 
-                # Try to extract summary
-                summary_match = re.search(
-                    r'## Conversation Summary\s*\n\s*\n?(.*?)(?:\n\n|\Z)',
-                    content, re.DOTALL | re.IGNORECASE
-                )
+                # Extract summary (first line or first header)
+                lines = content.split('\n')
+                for line in lines[:5]:
+                    if line.startswith('# ') or line.startswith('## '):
+                        file_data["summary"] = line.lstrip('# ').strip()[:100]
+                        break
+                
+                if not file_data["summary"] and lines:
+                    file_data["summary"] = lines[0].strip()[:100]
+                
+                # Look for "Summary" or "Notes" section
+                summary_match = re.search(r'(?:Summary|Notes):?\s*\n([^\n#]+)', content, re.IGNORECASE)
                 if summary_match:
                     file_data["summary"] = summary_match.group(1).strip()[:200]
                 
@@ -222,56 +237,61 @@ def parse_memory_files() -> dict[str, Any]:
     return memory_data
 
 
-def get_git_commits() -> dict[str, Any]:
-    """Get recent git commits from the repo."""
+def get_project_git_activity() -> dict[str, Any]:
+    """Get git activity from project repos (dashboard, website)."""
     git_data = {
         "timestamp": get_timestamp(),
-        "commits": [],
-        "branch": None,
+        "projects": [],
         "errors": []
     }
     
-    try:
-        if not os.path.exists(CONFIG["repo_dir"]):
-            git_data["errors"].append("Repository directory not found")
-            return git_data
+    for project in PROJECT_REPOS:
+        project_data = {
+            "name": project["name"],
+            "repo_name": project["repo_name"],
+            "path": project["path"],
+            "commits": [],
+            "uncommitted_changes": 0,
+            "uncommitted_files": [],
+            "branch": None
+        }
         
-        # Check if it's a git repo
-        git_dir = os.path.join(CONFIG["repo_dir"], ".git")
-        if not os.path.exists(git_dir):
-            git_data["errors"].append("Not a git repository")
-            return git_data
+        if not os.path.exists(os.path.join(project["path"], ".git")):
+            project_data["error"] = "Not a git repository"
+            git_data["projects"].append(project_data)
+            continue
         
-        # Get current branch
         try:
+            # Get current branch
             result = subprocess.run(
-                ["git", "-C", CONFIG["repo_dir"], "branch", "--show-current"],
+                ["git", "-C", project["path"], "branch", "--show-current"],
                 capture_output=True, text=True, timeout=5
             )
             if result.returncode == 0:
-                git_data["branch"] = result.stdout.strip()
-        except Exception as e:
-            git_data["errors"].append(f"Error getting branch: {str(e)}")
-        
-        # Get recent commits
-        try:
+                project_data["branch"] = result.stdout.strip()
+            
+            # Get recent commits with file stats
             result = subprocess.run(
                 [
-                    "git", "-C", CONFIG["repo_dir"], "log",
-                    f"-{CONFIG['max_git_commits']}",
-                    "--format=%H|%h|%s|%an|%at|%ar"
+                    "git", "-C", project["path"], "log",
+                    "-10",
+                    "--format=%H|%h|%s|%an|%at|%ar",
+                    "--stat"
                 ],
                 capture_output=True, text=True, timeout=5
             )
             
             if result.returncode == 0:
                 commits = []
+                current_commit = None
+                
                 for line in result.stdout.strip().split('\n'):
-                    if not line:
-                        continue
-                    parts = line.split('|')
-                    if len(parts) >= 6:
-                        commits.append({
+                    if '|' in line and len(line.split('|')) >= 6 and not line.startswith(' '):
+                        # New commit line
+                        if current_commit:
+                            commits.append(current_commit)
+                        parts = line.split('|')
+                        current_commit = {
                             "hash": parts[0],
                             "short_hash": parts[1],
                             "message": parts[2],
@@ -279,38 +299,62 @@ def get_git_commits() -> dict[str, Any]:
                             "timestamp": datetime.fromtimestamp(
                                 int(parts[4]), timezone.utc
                             ).isoformat(),
-                            "relative_time": parts[5]
-                        })
-                git_data["commits"] = commits
-                git_data["total_commits"] = len(commits)
-        except Exception as e:
-            git_data["errors"].append(f"Error getting commits: {str(e)}")
-        
-        # Get repo stats
-        try:
-            result = subprocess.run(
-                ["git", "-C", CONFIG["repo_dir"], "rev-list", "--count", "HEAD"],
-                capture_output=True, text=True, timeout=5
-            )
-            if result.returncode == 0:
-                git_data["total_commit_count"] = int(result.stdout.strip())
-        except Exception:
-            pass
-        
-        # Check for uncommitted changes
-        try:
-            result = subprocess.run(
-                ["git", "-C", CONFIG["repo_dir"], "status", "--porcelain"],
-                capture_output=True, text=True, timeout=5
-            )
-            if result.returncode == 0:
-                changes = result.stdout.strip().split('\n') if result.stdout.strip() else []
-                git_data["uncommitted_changes"] = len([c for c in changes if c])
-        except Exception:
-            git_data["uncommitted_changes"] = 0
+                            "relative_time": parts[5],
+                            "files_changed": 0,
+                            "insertions": 0,
+                            "deletions": 0
+                        }
+                    elif current_commit and ('files changed' in line or 'file changed' in line):
+                        # Parse file stats line
+                        files_match = re.search(r'(\d+)\s+files?\s+changed', line)
+                        insertions_match = re.search(r'(\d+)\s+insertions?', line)
+                        deletions_match = re.search(r'(\d+)\s+deletions?', line)
+                        
+                        if files_match:
+                            current_commit["files_changed"] = int(files_match.group(1))
+                        if insertions_match:
+                            current_commit["insertions"] = int(insertions_match.group(1))
+                        if deletions_match:
+                            current_commit["deletions"] = int(deletions_match.group(1))
+                
+                if current_commit:
+                    commits.append(current_commit)
+                
+                project_data["commits"] = commits
             
-    except Exception as e:
-        git_data["errors"].append(f"Error accessing git repo: {str(e)}")
+            # Check for uncommitted changes
+            result = subprocess.run(
+                ["git", "-C", project["path"], "status", "--porcelain"],
+                capture_output=True, text=True, timeout=5
+            )
+            if result.returncode == 0:
+                lines = result.stdout.strip().split('\n') if result.stdout.strip() else []
+                changes = [c for c in lines if c]
+                project_data["uncommitted_changes"] = len(changes)
+                
+                uncommitted_files = []
+                for line in changes:
+                    status = line[:2].strip()
+                    filename = line[3:].strip()
+                    status_desc = {
+                        'M': 'modified', 'A': 'added', 'D': 'deleted',
+                        'R': 'renamed', 'C': 'copied', 'U': 'updated', '??': 'untracked'
+                    }.get(status, status)
+                    uncommitted_files.append({"filename": filename, "status": status_desc})
+                project_data["uncommitted_files"] = uncommitted_files
+            
+            # Get total commit count
+            result = subprocess.run(
+                ["git", "-C", project["path"], "rev-list", "--count", "HEAD"],
+                capture_output=True, text=True, timeout=5
+            )
+            if result.returncode == 0:
+                project_data["total_commit_count"] = int(result.stdout.strip())
+                
+        except Exception as e:
+            project_data["error"] = str(e)
+        
+        git_data["projects"].append(project_data)
     
     return git_data
 
@@ -346,41 +390,34 @@ def get_system_metrics() -> dict[str, Any]:
                     fields = list(map(int, line.split()[1:]))
                     idle = fields[3]
                     total = sum(fields)
-                    cpu_percent = 100.0 * (1 - idle / total) if total > 0 else 0
+                    cpu_percent = 100 * (1 - idle / total) if total > 0 else 0
+                    metrics["cpu"]["percent"] = round(cpu_percent, 1)
         except Exception:
             pass
         
-        # Try psutil if available
-        if cpu_percent is None:
-            try:
-                import psutil
-                cpu_percent = psutil.cpu_percent(interval=0.1)
-            except ImportError:
-                pass
-        
-        # Try top command as fallback
+        # Fallback to top command
         if cpu_percent is None:
             try:
                 result = subprocess.run(
                     ["top", "-bn1"],
                     capture_output=True, text=True, timeout=2
                 )
-                for line in result.stdout.split('\n'):
-                    if 'Cpu(s):' in line:
-                        match = re.search(r'(\d+\.?\d*)%?\s*us', line)
-                        if match:
-                            cpu_percent = float(match.group(1))
-                            break
+                if result.returncode == 0:
+                    for line in result.stdout.split('\n'):
+                        if 'Cpu(s)' in line or '%Cpu' in line:
+                            # Parse CPU line
+                            match = re.search(r'(\d+\.?\d*)\s*%?\s*id', line)
+                            if match:
+                                idle = float(match.group(1))
+                                cpu_percent = 100 - idle
+                                metrics["cpu"]["percent"] = round(cpu_percent, 1)
+                                break
             except Exception:
                 pass
         
-        metrics["cpu"] = {
-            "percent": round(cpu_percent, 2) if cpu_percent is not None else None,
-            "cores": os.cpu_count()
-        }
-        # Also provide flat cpu_percent for frontend compatibility
-        metrics["cpu_percent"] = round(cpu_percent, 2) if cpu_percent is not None else 0
-        
+        if cpu_percent is None:
+            metrics["cpu"]["percent"] = 0
+            
     except Exception as e:
         metrics["errors"].append(f"Error reading CPU metrics: {str(e)}")
     
@@ -413,7 +450,6 @@ def get_system_metrics() -> dict[str, Any]:
                 "used_mb": round(used / 1024, 2),
                 "available_mb": round(available / 1024, 2),
                 "percent_used": round((used / total) * 100, 2) if total > 0 else 0,
-                # Frontend-compatible GB format
                 "total_gb": total_gb,
                 "used_gb": used_gb
             }
@@ -504,21 +540,15 @@ def get_skills_info() -> dict[str, Any]:
     return skills_data
 
 
-# ==================== Success Rate Tracking ====================
-
-SUCCESS_LOG_FILE = '/home/chris/clawd/dashboard/agent_success_log.jsonl'
-IDLE_TIMEOUT_MINUTES = 30
-
+# ==================== Agent Success Tracking ====================
 
 def load_success_history() -> dict[str, Any]:
     """Load agent success/failure history from log file."""
     history = {
-        "completions": [],
-        "failures": [],
-        "kills": [],
         "total_completed": 0,
         "total_failed": 0,
-        "total_killed": 0
+        "total_killed": 0,
+        "recent_events": []
     }
     
     if not os.path.exists(SUCCESS_LOG_FILE):
@@ -532,20 +562,24 @@ def load_success_history() -> dict[str, Any]:
                     continue
                 try:
                     entry = json.loads(line)
-                    event_type = entry.get("event_type")
-                    if event_type == "completion":
-                        history["completions"].append(entry)
+                    event_type = entry.get('event_type')
+                    
+                    if event_type == 'complete':
                         history["total_completed"] += 1
-                    elif event_type == "failure":
-                        history["failures"].append(entry)
+                    elif event_type == 'fail':
                         history["total_failed"] += 1
-                    elif event_type == "kill":
-                        history["kills"].append(entry)
+                    elif event_type == 'kill':
                         history["total_killed"] += 1
+                    
+                    # Keep last 50 events
+                    history["recent_events"].append(entry)
+                    if len(history["recent_events"]) > 50:
+                        history["recent_events"].pop(0)
+                        
                 except json.JSONDecodeError:
                     continue
     except Exception as e:
-        print(f"[{get_timestamp()}] Error reading success log: {e}")
+        print(f"[{get_timestamp()}] Error loading success history: {e}")
     
     return history
 
@@ -651,8 +685,8 @@ def kill_idle_agents(sessions: list) -> list[dict]:
                             killed.append({
                                 "session_key": session_key,
                                 "reason": "idle_timeout",
-                                "idle_minutes": round(idle_minutes),
-                                "label": label
+                                "label": label,
+                                "idle_minutes": round(idle_minutes)
                             })
                             log_agent_event("kill", session_key, {"reason": "idle_timeout", "idle_minutes": round(idle_minutes)})
             except Exception as e:
@@ -662,10 +696,10 @@ def kill_idle_agents(sessions: list) -> list[dict]:
 
 
 def kill_agent_session(session_key: str) -> bool:
-    """Kill a specific agent session using openclaw."""
+    """Kill a specific agent session using openclaw CLI."""
     try:
         result = subprocess.run(
-            ['openclaw', 'sessions', 'kill', session_key],
+            ["openclaw", "sessions", "kill", session_key, "--force"],
             capture_output=True, text=True, timeout=10
         )
         return result.returncode == 0
@@ -673,6 +707,8 @@ def kill_agent_session(session_key: str) -> bool:
         print(f"[{get_timestamp()}] Error killing session {session_key}: {e}")
         return False
 
+
+# ==================== Main Loop ====================
 
 def collect_all_data() -> dict[str, Any]:
     """Collect all data sources and combine into single structure."""
@@ -709,7 +745,7 @@ def collect_all_data() -> dict[str, Any]:
         "context_usage_percent": main_context_usage,
         "sessions": sessions_data,
         "memory": parse_memory_files(),
-        "git": get_git_commits(),
+        "git": get_project_git_activity(),
         "system": get_system_metrics(),
         "skills": get_skills_info(),
         "messages": agent_messages,

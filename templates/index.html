@@ -455,6 +455,19 @@
                 </div>
                 
                 <div>
+                    <label class="block text-sm text-gray-400 mb-1">Category <span class="text-red-400">*</span></label>
+                    <select id="task-category" required
+                            class="w-full bg-modo-nav border border-gray-700 rounded-lg px-3 py-2 text-white focus:border-modo-purple focus:outline-none transition-colors">
+                        <option value="" disabled selected>Select category...</option>
+                        <option value="Core">Core — Infrastructure, agents, cron</option>
+                        <option value="Ship">Ship — Blog deploy, shop, revenue</option>
+                        <option value="Build">Build — New features, automations</option>
+                        <option value="Fix">Fix — Bugs, broken things</option>
+                        <option value="Read">Read — Research, learning, Moltbook</option>
+                    </select>
+                </div>
+                
+                <div>
                     <label class="block text-sm text-gray-400 mb-1">Priority</label>
                     <select id="task-priority"
                             class="w-full bg-modo-nav border border-gray-700 rounded-lg px-3 py-2 text-white focus:border-modo-purple focus:outline-none transition-colors">
@@ -538,6 +551,12 @@
                         <label class="block text-xs text-gray-500 uppercase tracking-wide mb-1">Priority</label>
                         <p id="view-task-priority" class="text-white text-sm capitalize"></p>
                     </div>
+                    
+                    <!-- Category -->
+                    <div>
+                        <label class="block text-xs text-gray-500 uppercase tracking-wide mb-1">Category</label>
+                        <p id="view-task-category" class="text-white text-sm"></p>
+                    </div>
                 </div>
                 
                 <!-- Assigned Agent -->
@@ -590,6 +609,6 @@
         </div>
     </div>
 
-    <script src="/static/dashboard.js?v=7"></script>
+    <script src="/static/dashboard.js?v=14"></script>
 </body>
 </html>

@@ -133,12 +133,23 @@ def get_session_info() -> dict[str, dict]:
             
             for session_key, session_data in data.items():
                 session_id = session_data.get("sessionId", "")
+                # Convert createdAt timestamp to ISO format
+                created_at = None
+                if session_data.get("createdAt"):
+                    try:
+                        created_at = datetime.fromtimestamp(
+                            session_data.get("createdAt") / 1000, timezone.utc
+                        ).isoformat()
+                    except:
+                        pass
+                
                 sessions_info[session_id] = {
                     "key": session_key,
                     "label": session_data.get("label", session_key.split(":")[-1] if ":" in session_key else session_key),
                     "spawned_by": session_data.get("spawnedBy"),
                     "channel": session_data.get("lastChannel", "unknown"),
                     "model": session_data.get("model", "unknown"),
+                    "created_at": created_at,
                 }
     except (json.JSONDecodeError, IOError) as e:
         print(f"[MessageCollector] Error reading sessions.json: {e}")
@@ -158,26 +169,69 @@ def detect_communication_type(text: str) -> str | None:
     return None
 
 
+def get_bot_name() -> str:
+    """Read bot name from IDENTITY.md in workspace root."""
+    identity_file = "/home/chris/clawd/IDENTITY.md"
+    try:
+        if os.path.exists(identity_file):
+            with open(identity_file, 'r') as f:
+                for line in f:
+                    if line.strip().startswith('- **Name:**'):
+                        # Extract name from "- **Name:** Jarvis" and strip markdown
+                        name = line.split(':', 1)[1].strip()
+                        # Remove any remaining markdown formatting
+                        name = name.replace('**', '').replace('*', '').strip()
+                        return name if name else "Jarvis"
+    except Exception as e:
+        print(f"[MessageCollector] Error reading IDENTITY.md: {e}")
+    return "Jarvis"
+
+
+# Cache bot name at module load
+_BOT_NAME = get_bot_name()
+
+
+# Friends TV Show character names for sub-agents (66 total)
+FRIENDS_CHARACTERS = [
+    # Main Cast (6)
+    "Rachel", "Monica", "Phoebe", "Joey", "Chandler", "Ross",
+    # Recurring Characters (30)
+    "Gunther", "Janice", "Mike", "David", "Richard", "Pete", "Tag", "Paul",
+    "Emily", "Carol", "Susan", "Ben", "Emma", "Jack", "Judy", "Leonard",
+    "Sandra", "Frank", "Alice", "Ursula", "Estelle", "Eddie", "Barry",
+    "MrHeckles", "Treeger", "Joshua", "Mindy", "Kathy", "Charlie", "Elizabeth",
+    "Paolo", "Julie", "FunBobby", "Gary", "Larry", "Vince", "Jason", "Duncan",
+    "Terry", "Joanna", "Gavin", "MrZelner", "Kim", "Nora", "Hugsy",
+    # Family (14)
+    "Jill", "Amy", "NoraBing", "Helena", "Charles", "Bitsy", "Theodore",
+    "Drake", "Marcel", "Russ", "Danny", "Roy", "Stu", "Doug",
+    # Extras/One-offs (16)
+    "UglyNakedGuy", "Lowell", "Bob", "Gandalf", "Hoshi", "DrRemore",
+    "Erica", "FrankJr", "AliceKnight", "JudyGeller", "JackGeller",
+    "CarolWillick", "SusanBunch", "BarryFarber", "EmilyWaltham", "MikeHannigan"
+]
+
+
+def get_friends_name_from_session_key(session_key: str) -> str:
+    """Generate a consistent Friends character name from session key."""
+    import hashlib
+    # Use hash of session key to pick a consistent character
+    hash_val = int(hashlib.md5(session_key.encode()).hexdigest(), 16)
+    return FRIENDS_CHARACTERS[hash_val % len(FRIENDS_CHARACTERS)]
+
+
 def extract_agent_name_from_session_key(session_key: str) -> str:
     """Extract a readable agent name from session key."""
     if not session_key:
         return "unknown"
     
     # Handle different session key formats
-    if "subagent" in session_key:
-        # agent:main:subagent:xxx -> subagent-xxx
-        parts = session_key.split(":")
-        if len(parts) >= 4:
-            return f"subagent-{parts[3][:8]}"
-    
-    if "cron" in session_key:
-        # agent:main:cron:xxx -> cron-xxx
-        parts = session_key.split(":")
-        if len(parts) >= 4:
-            return f"cron-{parts[3][:8]}"
+    if "subagent" in session_key or "cron" in session_key:
+        # Use Friends character name for both subagents and cron agents
+        return get_friends_name_from_session_key(session_key)
     
     if "main:main" in session_key:
-        return "main-agent"
+        return _BOT_NAME
     
     # Default: return last part or truncated key
     parts = session_key.split(":")
@@ -342,6 +396,24 @@ def extract_messages_from_entry(
     return messages
 
 
+def get_session_creation_time(session_id: str) -> str | None:
+    """Get session creation time from transcript file."""
+    transcript_path = Path(CONFIG["sessions_dir"]) / f"{session_id}.jsonl"
+    if not transcript_path.exists():
+        return None
+    
+    try:
+        with open(transcript_path, 'r') as f:
+            first_line = f.readline().strip()
+            if first_line:
+                entry = json.loads(first_line)
+                return entry.get("timestamp")
+    except (json.JSONDecodeError, IOError):
+        pass
+    
+    return None
+
+
 def detect_spawn_relationships(sessions_info: dict[str, dict]) -> list[dict]:
     """Detect agent spawn relationships from sessions.json."""
     messages = []
@@ -358,8 +430,15 @@ def detect_spawn_relationships(sessions_info: dict[str, dict]) -> list[dict]:
                 info.get("key", session_id)
             )
             
+            # Try to get actual creation time from transcript file
+            created_at = get_session_creation_time(session_id)
+            if not created_at:
+                created_at = info.get("created_at")
+            if not created_at:
+                created_at = get_timestamp()
+            
             messages.append({
-                "timestamp": get_timestamp(),
+                "timestamp": created_at,
                 "from": parent_name,
                 "to": child_name,
                 "message": f"Spawned subagent for task: {info.get('label', 'unknown task')}",
