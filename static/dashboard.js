@@ -65,23 +65,155 @@ async function initDashboard() {
 function switchTab(tab) {
     const dashboardView = document.getElementById('dashboard-view');
     const kanbanView = document.getElementById('kanban-view');
+    const projectsView = document.getElementById('projects-view');
     const dashboardTab = document.getElementById('tab-dashboard');
     const kanbanTab = document.getElementById('tab-kanban');
+    const projectsTab = document.getElementById('tab-projects');
     
+    // Reset all tabs
+    [dashboardTab, kanbanTab, projectsTab].forEach(t => {
+        t.classList.remove('border-modo-blue', 'text-white');
+        t.classList.add('border-transparent', 'text-modo-gray');
+    });
+    
+    // Hide all views
+    dashboardView.classList.add('hidden');
+    kanbanView.classList.add('hidden');
+    projectsView.classList.add('hidden');
+    
+    // Show selected tab
     if (tab === 'dashboard') {
         dashboardView.classList.remove('hidden');
-        kanbanView.classList.add('hidden');
         dashboardTab.classList.add('border-modo-blue', 'text-white');
         dashboardTab.classList.remove('border-transparent', 'text-modo-gray');
-        kanbanTab.classList.remove('border-modo-blue', 'text-white');
-        kanbanTab.classList.add('border-transparent', 'text-modo-gray');
-    } else {
-        dashboardView.classList.add('hidden');
+    } else if (tab === 'kanban') {
         kanbanView.classList.remove('hidden');
         kanbanTab.classList.add('border-modo-blue', 'text-white');
         kanbanTab.classList.remove('border-transparent', 'text-modo-gray');
-        dashboardTab.classList.remove('border-modo-blue', 'text-white');
-        dashboardTab.classList.add('border-transparent', 'text-modo-gray');
+    } else if (tab === 'projects') {
+        projectsView.classList.remove('hidden');
+        projectsTab.classList.add('border-modo-blue', 'text-white');
+        projectsTab.classList.remove('border-transparent', 'text-modo-gray');
+        // Load projects when tab is opened
+        loadGitHubProjects();
+    }
+}
+
+// ==================== GitHub Projects ====================
+async function loadGitHubProjects() {
+    const container = document.getElementById('projects-grid');
+    const lastUpdatedEl = document.getElementById('projects-last-updated');
+    
+    if (!container) return;
+    
+    try {
+        // Show loading state
+        container.innerHTML = `
+            <div class="col-span-full text-center py-12">
+                <div class="text-4xl mb-3 animate-pulse">⏳</div>
+                <p class="text-gray-400">Loading projects...</p>
+            </div>
+        `;
+        
+        // Fetch from GitHub API
+        const response = await fetch('https://api.github.com/users/chrisgwynne/repos?sort=updated&per_page=20');
+        if (!response.ok) throw new Error(`GitHub API error: ${response.status}`);
+        
+        const repos = await response.json();
+        
+        if (repos.length === 0) {
+            container.innerHTML = `
+                <div class="col-span-full text-center py-12">
+                    <div class="text-4xl mb-3">📭</div>
+                    <p class="text-gray-400">No public repositories found</p>
+                </div>
+            `;
+            return;
+        }
+        
+        // Filter out forks and sort by recently updated
+        const ownRepos = repos.filter(r => !r.fork);
+        
+        container.innerHTML = ownRepos.map(repo => {
+            const updatedDate = new Date(repo.updated_at);
+            const daysAgo = Math.floor((Date.now() - updatedDate) / (1000 * 60 * 60 * 24));
+            const updatedText = daysAgo === 0 ? 'today' : daysAgo === 1 ? 'yesterday' : `${daysAgo} days ago`;
+            
+            // Language color mapping
+            const langColors = {
+                'JavaScript': 'bg-yellow-400',
+                'TypeScript': 'bg-blue-400',
+                'Python': 'bg-green-400',
+                'HTML': 'bg-orange-400',
+                'CSS': 'bg-purple-400',
+                'Shell': 'bg-gray-400',
+                'Java': 'bg-red-400',
+                'Go': 'bg-cyan-400',
+                'Rust': 'bg-orange-600',
+                'Ruby': 'bg-red-500'
+            };
+            const langColor = langColors[repo.language] || 'bg-gray-500';
+            
+            return `
+                <div class="bg-modo-card rounded-lg p-5 border border-white/5 hover:border-purple-500/30 transition-all group">
+                    <div class="flex items-start justify-between mb-3">
+                        <h3 class="font-bold text-white group-hover:text-purple-400 transition-colors">
+                            <a href="${repo.html_url}" target="_blank" class="hover:underline">${escapeHtml(repo.name)}</a>
+                        </h3>
+                        <span class="text-xs text-gray-500">${repo.visibility || 'public'}</span>
+                    </div>
+                    
+                    <p class="text-sm text-gray-400 mb-4 line-clamp-2">${escapeHtml(repo.description || 'No description')}</p>
+                    
+                    <div class="flex items-center gap-4 text-xs text-gray-500 mb-3">
+                        ${repo.language ? `
+                            <div class="flex items-center gap-1.5">
+                                <span class="w-2.5 h-2.5 rounded-full ${langColor}"></span>
+                                <span>${repo.language}</span>
+                            </div>
+                        ` : ''}
+                        <div class="flex items-center gap-1">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                            </svg>
+                            <span>${repo.stargazers_count}</span>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M7.707 3.293a1 1 0 010 1.414L5.414 7H11a7 7 0 017 7v2a1 1 0 11-2 0v-2a5 5 0 00-5-5H5.414l2.293 2.293a1 1 0 11-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                            </svg>
+                            <span>${repo.forks_count}</span>
+                        </div>
+                        ${repo.open_issues_count > 0 ? `
+                            <div class="flex items-center gap-1 text-red-400">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                                </svg>
+                                <span>${repo.open_issues_count}</span>
+                            </div>
+                        ` : ''}
+                    </div>
+                    
+                    <div class="text-xs text-gray-500 pt-3 border-t border-white/5">
+                        Updated ${updatedText}
+                    </div>
+                </div>
+            `;
+        }).join('');
+        
+        if (lastUpdatedEl) {
+            lastUpdatedEl.textContent = `Updated: ${new Date().toLocaleTimeString()}`;
+        }
+        
+    } catch (err) {
+        console.error('[Dashboard] Error loading GitHub projects:', err);
+        container.innerHTML = `
+            <div class="col-span-full text-center py-12">
+                <div class="text-4xl mb-3">❌</div>
+                <p class="text-red-400">Failed to load projects</p>
+                <p class="text-gray-500 text-sm mt-2">${escapeHtml(err.message)}</p>
+            </div>
+        `;
     }
 }
 
