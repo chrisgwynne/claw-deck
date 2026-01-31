@@ -288,6 +288,8 @@ function renderAgents(sessions) {
     const container = document.getElementById('agent-cards');
     if (!container) return;
     
+    console.log('[Dashboard] renderAgents called with', sessions.length, 'sessions');
+    
     // Filter and categorize sessions
     const now = new Date();
     const ACTIVE_THRESHOLD_MS = 10 * 60 * 1000; // 10 minutes
@@ -335,6 +337,8 @@ function renderAgents(sessions) {
     
     const subagentCount = categorizedSessions.filter(s => s.isSubagent && s.status !== 'IDLE').length;
     const idleTimeoutCount = categorizedSessions.filter(s => s.isSubagent && s.status === 'IDLE').length;
+    
+    console.log('[Dashboard] Agent stats:', { total: categorizedSessions.length, subagents: subagentCount, idleTimeout: idleTimeoutCount });
     
     if (bossEl) bossEl.textContent = 'Jarvis';
     if (subagentsEl) subagentsEl.textContent = subagentCount;
