@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claw Deck</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'modo-bg': '#0A0E14',
+                        'modo-nav': '#12161E',
+                        'modo-card': '#1A1F2E',
+                        'modo-text': '#E5E7EB',
+                        'modo-gray': '#6B7280',
+                        'modo-light-gray': '#9CA3AF',
+                        'modo-blue': '#3B82F6',
+                        'modo-orange': '#F59E0B',
+                        'modo-purple': '#8B5CF6',
+                        'modo-green': '#10B981',
+                        'modo-red': '#EF4444',
+                        'modo-yellow': '#FBBF24',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #12161E;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #374151;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4B5563;
+        }
+
+        /* Kanban drag and drop styles */
+        .kanban-dropzone {
+            min-height: 200px;
+            transition: all 0.2s ease;
+        }
+        
+        .kanban-dropzone.drag-over {
+            background-color: rgba(139, 92, 246, 0.1);
+            box-shadow: inset 0 0 20px rgba(139, 92, 246, 0.1);
+        }
+        
+        .kanban-card {
+            transition: all 150ms ease-in-out;
+            cursor: grab;
+            user-select: none;
+        }
+        
+        .kanban-card:hover {
+            filter: brightness(1.1);
+            transform: scale(1.02);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+        }
+        
+        .kanban-card:active {
+            cursor: grabbing;
+        }
+        
+        .kanban-card.dragging {
+            opacity: 0.8;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        /* Status dots */
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        /* Toggle switch */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #10B981;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #10B981;
+        }
+
+        /* Modal animations */
+        #task-modal:not(.hidden),
+        #delete-modal:not(.hidden) {
+            animation: fadeIn 0.2s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        #task-modal > div,
+        #delete-modal > div {
+            animation: slideUp 0.2s ease;
+        }
+        
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body class="bg-gray-950 min-h-screen p-4">
+    <!-- Main Container -->
+    <div class="bg-modo-bg min-h-[calc(100vh-2rem)] rounded-xl border border-gray-800 overflow-hidden flex flex-col">
+        
+        <!-- macOS Traffic Lights + Top Bar -->
+        <div class="h-[60px] bg-modo-nav flex items-center px-4 border-b border-gray-800">
+            <!-- Traffic Lights (Left) -->
+            <div class="flex items-center gap-2 mr-6">
+                <div class="w-3 h-3 rounded-full bg-red-500 hover:bg-red-400 cursor-pointer"></div>
+                <div class="w-3 h-3 rounded-full bg-yellow-500 hover:bg-yellow-400 cursor-pointer"></div>
+                <div class="w-3 h-3 rounded-full bg-green-500 hover:bg-green-400 cursor-pointer"></div>
+            </div>
+
+            <!-- Logo & Brand (Left) -->
+            <div class="flex items-center gap-3 mr-8">
+                <div class="w-8 h-8 bg-modo-orange rounded-lg flex items-center justify-center">
+                    <span class="text-white font-bold text-sm">🦞</span>
+                </div>
+                <span class="text-white font-semibold text-lg">Claw Deck</span>
+                <span class="bg-modo-orange/30 text-modo-orange text-xs px-2 py-0.5 rounded border border-modo-orange/50">beta</span>
+            </div>
+
+            <!-- Spacer -->
+            <div class="flex-1"></div>
+
+            <!-- Right Side Controls -->
+            <div class="flex items-center gap-4">
+                <!-- Auto/Pause Toggle -->
+                <div class="flex items-center gap-2">
+                    <span class="text-modo-light-gray text-sm">Auto</span>
+                    <div class="relative inline-block w-10 mr-2 align-middle select-none">
+                        <input type="checkbox" id="auto-toggle" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer transition-all duration-200 ease-in-out left-0" checked>
+                        <label for="auto-toggle" class="toggle-label block overflow-hidden h-5 rounded-full bg-modo-green cursor-pointer transition-colors duration-200"></label>
+                    </div>
+                </div>
+
+                <!-- Add Task Button -->
+                <button onclick="openTaskModal()" class="bg-modo-red hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                    Add Task
+                </button>
+
+                <!-- User Avatar -->
+                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center cursor-pointer">
+                    <span class="text-white text-xs font-semibold">U</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Board Header -->
+        <div class="h-10 bg-modo-bg flex items-center justify-end px-6 border-b border-gray-800">
+            <span class="text-modo-gray text-sm">
+                <span id="inbox-count">0</span> inbox | <span id="inprogress-count">0</span> in progress
+            </span>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="flex items-center justify-between px-6 pt-2 bg-modo-bg border-b border-gray-800">
+            <div class="flex items-center gap-1">
+                <button id="tab-dashboard" onclick="switchTab('dashboard')" 
+                        class="px-4 py-2 text-sm font-medium border-b-2 border-modo-blue text-white transition-colors">
+                    📊 Dashboard
+                </button>
+                <button id="tab-kanban" onclick="switchTab('kanban')" 
+                        class="px-4 py-2 text-sm font-medium border-b-2 border-transparent text-modo-gray hover:text-white transition-colors">
+                    📋 Kanban
+                </button>
+            </div>
+            <div class="text-xs flex items-center gap-2" style="color: #9CA3AF;">
+                <span id="refresh-indicator" class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse" style="display: inline-block; background-color: #10B981;"></span>
+                    <span id="last-refreshed" style="color: #9CA3AF;">Just now</span>
+                </span>
+            </div>
+        </div>
+
+        <!-- Dashboard View -->
+        <div id="dashboard-view" class="flex-1 overflow-y-auto p-6">
+            <!-- System Health -->
+            <section class="mb-8">
+                <h2 class="text-xl mb-4 text-white font-semibold">💚 System Health</h2>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <!-- Success Rate -->
+                    <div class="bg-gradient-to-br from-green-600 to-green-700 rounded-lg p-5 text-center">
+                        <div class="text-4xl mb-2">🎉</div>
+                        <div class="text-3xl font-bold" id="success-rate">--</div>
+                        <div class="text-sm text-green-100">Success Rate</div>
+                    </div>
+
+                    <!-- Agents -->
+                    <div class="bg-modo-card rounded-lg p-5 border border-white/5">
+                        <h3 class="text-base mb-3 text-white font-medium">👥 Agents</h3>
+                        <div class="space-y-2">
+                            <div class="flex justify-between bg-modo-nav p-2 rounded text-sm">
+                                <span class="text-modo-light-gray">Total</span>
+                                <span id="agent-total" class="text-white">0</span>
+                            </div>
+                            <div class="flex justify-between bg-modo-nav p-2 rounded text-sm">
+                                <span class="text-modo-light-gray">Active</span>
+                                <span id="agent-active" class="text-white">0</span>
+                            </div>
+                            <div class="flex justify-between bg-modo-nav p-2 rounded text-sm">
+                                <span class="text-modo-light-gray">Idle</span>
+                                <span id="agent-idle" class="text-white">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tasks -->
+                    <div class="bg-modo-card rounded-lg p-5 border border-white/5">
+                        <h3 class="text-base mb-3 text-white font-medium">📋 Tasks</h3>
+                        <div class="space-y-2">
+                            <div class="flex justify-between bg-modo-nav p-2 rounded text-sm">
+                                <span class="text-modo-light-gray">Pending</span>
+                                <span id="task-pending" class="text-white">0</span>
+                            </div>
+                            <div class="flex justify-between bg-modo-nav p-2 rounded text-sm">
+                                <span class="text-modo-light-gray">Active</span>
+                                <span id="task-active" class="text-white">0</span>
+                            </div>
+                            <div class="flex justify-between bg-modo-nav p-2 rounded text-sm">
+                                <span class="text-modo-light-gray">Done</span>
+                                <span id="task-completed" class="text-white">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- System -->
+                    <div class="bg-modo-card rounded-lg p-5 border border-white/5">
+                        <h3 class="text-base mb-3 text-white font-medium">🖥️ System</h3>
+                        <div class="space-y-2">
+                            <div>
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span class="text-modo-light-gray">Context Usage</span>
+                                    <span id="sys-context" class="text-white">--</span>
+                                </div>
+                                <div class="w-full bg-modo-nav rounded h-1.5">
+                                    <div id="context-bar" class="h-1.5 rounded bg-green-500 transition-all" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            <div class="flex justify-between bg-modo-nav p-2 rounded text-sm">
+                                <span class="text-modo-light-gray">Active Model Mix</span>
+                                <span id="sys-models" class="text-white">--</span>
+                            </div>
+                            <div class="flex justify-between bg-modo-nav p-2 rounded text-sm">
+                                <span class="text-modo-light-gray">Total Tokens</span>
+                                <span id="sys-tokens" class="text-white">--</span>
+                            </div>
+                            <div class="flex justify-between bg-modo-nav p-2 rounded text-sm">
+                                <span class="text-modo-light-gray">Success Rate</span>
+                                <span id="sys-success" class="text-white">--</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Agent Control Panel -->
+            <section class="mb-8">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl text-white font-semibold">🎮 Agent Control Panel</h2>
+                    <button id="emergency-stop-btn" onclick="emergencyStopAll()" 
+                            class="bg-modo-red hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-bold transition-colors flex items-center gap-2">
+                        <span>🛑</span> Emergency Stop All
+                    </button>
+                </div>
+                <div id="control-panel-status" class="mb-4 p-3 bg-modo-card rounded-lg border border-white/5 hidden">
+                    <span id="control-panel-message" class="text-white"></span>
+                </div>
+            </section>
+
+            <!-- Active Agents -->
+            <section class="mb-8">
+                <h2 class="text-xl mb-4 text-white font-semibold">🤖 Active Agents</h2>
+                <div id="agent-cards" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <p class="text-modo-gray col-span-2">Loading agents...</p>
+                </div>
+            </section>
+
+            <!-- Agent Communication -->
+            <section class="mb-8">
+                <h2 class="text-xl mb-4 text-white font-semibold">💬 Agent Communication</h2>
+                <div id="agent-messages" class="bg-modo-card rounded-lg p-4 h-48 overflow-y-auto border border-white/5">
+                    <p class="text-modo-gray text-sm">No messages</p>
+                </div>
+            </section>
+
+            <!-- Git Activity -->
+            <section class="mb-8">
+                <h2 class="text-xl mb-4 text-white font-semibold">📦 Git Activity</h2>
+                <div id="git-activity" class="bg-modo-card rounded-lg p-4 border border-white/5 h-48 overflow-y-auto">
+                    <p class="text-modo-gray text-sm">No commits</p>
+                </div>
+            </section>
+        </div>
+
+        <!-- Kanban View -->
+        <div id="kanban-view" class="hidden flex-1 overflow-x-auto overflow-y-hidden">
+            <!-- Kanban Stats & Alerts Bar -->
+            <div class="px-4 pt-4 pb-2 min-w-max">
+                <!-- Stats Row -->
+                <div class="flex items-center gap-6 mb-3">
+                    <div class="flex items-center gap-2 bg-modo-card px-4 py-2 rounded-lg border border-white/5">
+                        <span class="text-gray-400 text-sm">Inbox:</span>
+                        <span id="kanban-stat-inbox" class="text-modo-blue font-bold">0</span>
+                    </div>
+                    <div class="flex items-center gap-2 bg-modo-card px-4 py-2 rounded-lg border border-white/5">
+                        <span class="text-gray-400 text-sm">Up Next:</span>
+                        <span id="kanban-stat-upnext" class="text-modo-yellow font-bold">0</span>
+                    </div>
+                    <div class="flex items-center gap-2 bg-modo-card px-4 py-2 rounded-lg border border-white/5">
+                        <span class="text-gray-400 text-sm">In Progress:</span>
+                        <span id="kanban-stat-progress" class="text-modo-orange font-bold">0</span>
+                    </div>
+                </div>
+                
+                <!-- Alerts Container -->
+                <div id="kanban-alerts" class="hidden space-y-2">
+                    <!-- Context Warning -->
+                    <div id="alert-context" class="hidden bg-red-500/20 border border-red-500/50 rounded-lg px-4 py-2 flex items-center gap-3">
+                        <span class="text-red-400">⚠️</span>
+                        <span class="text-red-200 text-sm">Context at <span id="alert-context-pct">0</span>% — consider new session</span>
+                    </div>
+                    
+                    <!-- Stuck Tasks -->
+                    <div id="alert-stuck" class="hidden bg-yellow-500/20 border border-yellow-500/50 rounded-lg px-4 py-2">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="text-yellow-400">🐌</span>
+                            <span class="text-yellow-200 text-sm font-medium">Tasks stuck >24h in progress:</span>
+                        </div>
+                        <ul id="alert-stuck-list" class="text-yellow-100 text-xs ml-6 space-y-1">
+                        </ul>
+                    </div>
+                    
+                    <!-- Killed Agents -->
+                    <div id="alert-killed" class="hidden bg-red-500/20 border border-red-500/50 rounded-lg px-4 py-2 flex items-center gap-3">
+                        <span class="text-red-400">💀</span>
+                        <span class="text-red-200 text-sm"><span id="alert-killed-count">0</span> agent(s) killed overnight</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex h-full min-w-max px-4 pb-4 gap-4">
+                
+                <!-- Column 1: Inbox -->
+                <div class="w-[280px] flex flex-col">
+                    <!-- Column Header -->
+                    <div class="flex items-center justify-between mb-3 px-1">
+                        <div class="flex items-center gap-2">
+                            <span class="status-dot bg-modo-blue"></span>
+                            <span class="text-white font-medium text-sm">Inbox</span>
+                        </div>
+                        <span class="bg-gray-700 text-gray-300 text-xs w-6 h-6 rounded-full flex items-center justify-center" id="count-inbox">0</span>
+                    </div>
+                    <!-- Dropzone -->
+                    <div class="kanban-dropzone flex-1 bg-modo-bg rounded-lg p-2 space-y-3" data-status="inbox" id="col-inbox">
+                        <!-- Task cards will be rendered here -->
+                    </div>
+                </div>
+
+                <!-- Column 2: Up Next -->
+                <div class="w-[280px] flex flex-col">
+                    <div class="flex items-center justify-between mb-3 px-1">
+                        <div class="flex items-center gap-2">
+                            <span class="status-dot bg-modo-blue"></span>
+                            <span class="text-white font-medium text-sm">Up Next</span>
+                        </div>
+                        <span class="bg-gray-700 text-gray-300 text-xs w-6 h-6 rounded-full flex items-center justify-center" id="count-up_next">0</span>
+                    </div>
+                    <div class="kanban-dropzone flex-1 bg-modo-bg rounded-lg p-2 space-y-3" data-status="up_next" id="col-up_next"></div>
+                </div>
+
+                <!-- Column 3: In Progress -->
+                <div class="w-[280px] flex flex-col">
+                    <div class="flex items-center justify-between mb-3 px-1">
+                        <div class="flex items-center gap-2">
+                            <span class="status-dot bg-modo-orange"></span>
+                            <span class="text-white font-medium text-sm">In Progress</span>
+                        </div>
+                        <span class="bg-gray-700 text-gray-300 text-xs w-6 h-6 rounded-full flex items-center justify-center" id="count-in_progress">0</span>
+                    </div>
+                    <div class="kanban-dropzone flex-1 bg-modo-bg rounded-lg p-2 space-y-3" data-status="in_progress" id="col-in_progress"></div>
+                </div>
+
+                <!-- Column 4: In Review -->
+                <div class="w-[280px] flex flex-col">
+                    <div class="flex items-center justify-between mb-3 px-1">
+                        <div class="flex items-center gap-2">
+                            <span class="status-dot bg-modo-purple"></span>
+                            <span class="text-white font-medium text-sm">In Review</span>
+                        </div>
+                        <span class="bg-gray-700 text-gray-300 text-xs w-6 h-6 rounded-full flex items-center justify-center" id="count-in_review">0</span>
+                    </div>
+                    <div class="kanban-dropzone flex-1 bg-modo-bg rounded-lg p-2 space-y-3" data-status="in_review" id="col-in_review"></div>
+                </div>
+
+                <!-- Column 5: Done -->
+                <div class="w-[280px] flex flex-col">
+                    <div class="flex items-center justify-between mb-3 px-1">
+                        <div class="flex items-center gap-2">
+                            <span class="status-dot bg-modo-green"></span>
+                            <span class="text-white font-medium text-sm">Done</span>
+                        </div>
+                        <span class="bg-gray-700 text-gray-300 text-xs w-6 h-6 rounded-full flex items-center justify-center" id="count-done">0</span>
+                    </div>
+                    <div class="kanban-dropzone flex-1 bg-modo-bg rounded-lg p-2 space-y-3" data-status="done" id="col-done"></div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Task Modal -->
+    <div id="task-modal" class="fixed inset-0 bg-black bg-opacity-60 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-modo-card rounded-xl max-w-md w-full border border-gray-700 shadow-2xl">
+            <div class="px-6 py-4 border-b border-gray-700 flex justify-between items-center">
+                <h3 class="text-lg font-semibold text-white" id="modal-title">New Task</h3>
+                <button onclick="closeTaskModal()" class="text-gray-400 hover:text-white text-2xl">&times;</button>
+            </div>
+            <form id="task-form" onsubmit="handleTaskSubmit(event)" class="p-6 space-y-4">
+                <input type="hidden" id="task-id" value="">
+                
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Title</label>
+                    <input type="text" id="task-title" required
+                           class="w-full bg-modo-nav border border-gray-700 rounded-lg px-3 py-2 text-white focus:border-modo-purple focus:outline-none transition-colors"
+                           placeholder="Enter task title...">
+                </div>
+                
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Description</label>
+                    <textarea id="task-description" rows="3"
+                              class="w-full bg-modo-nav border border-gray-700 rounded-lg px-3 py-2 text-white focus:border-modo-purple focus:outline-none resize-none transition-colors"
+                              placeholder="Enter task description..."></textarea>
+                </div>
+                
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Priority</label>
+                    <select id="task-priority"
+                            class="w-full bg-modo-nav border border-gray-700 rounded-lg px-3 py-2 text-white focus:border-modo-purple focus:outline-none transition-colors">
+                        <option value="low">Low</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="high">High</option>
+                        <option value="critical">Critical</option>
+                    </select>
+                </div>
+                
+                <div class="flex gap-3 pt-4">
+                    <button type="button" onclick="closeTaskModal()"
+                            class="flex-1 bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                        Cancel
+                    </button>
+                    <button type="submit"
+                            class="flex-1 bg-modo-purple hover:bg-purple-600 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                        Save Task
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Task View Modal -->
+    <div id="task-view-modal" class="fixed inset-0 bg-black bg-opacity-60 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-modo-card rounded-xl max-w-lg w-full border border-gray-700 shadow-2xl">
+            <div class="px-6 py-4 border-b border-gray-700 flex justify-between items-center">
+                <h3 class="text-lg font-semibold text-white">Task Details</h3>
+                <button onclick="closeTaskViewModal()" class="text-gray-400 hover:text-white text-2xl">&times;</button>
+            </div>
+            <div class="p-6 space-y-4">
+                <!-- Task Name -->
+                <div>
+                    <label class="block text-xs text-gray-500 uppercase tracking-wide mb-1">Task Name</label>
+                    <h4 id="view-task-title" class="text-xl font-semibold text-white"></h4>
+                </div>
+                
+                <!-- Task Description -->
+                <div id="view-task-description-container">
+                    <label class="block text-xs text-gray-500 uppercase tracking-wide mb-1">Description</label>
+                    <p id="view-task-description" class="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap"></p>
+                </div>
+                
+                <!-- Obsidian Link -->
+                <div id="view-task-obsidian-container" class="hidden">
+                    <label class="block text-xs text-gray-500 uppercase tracking-wide mb-1">Obsidian</label>
+                    <a id="view-task-obsidian-link" href="#" target="_blank" 
+                       class="inline-flex items-center gap-2 text-modo-blue hover:text-blue-400 text-sm transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                        </svg>
+                        <span>Open in Obsidian</span>
+                    </a>
+                </div>
+                
+                <!-- Meta Info Grid -->
+                <div class="grid grid-cols-2 gap-4 pt-4 border-t border-gray-700">
+                    <!-- Added By -->
+                    <div>
+                        <label class="block text-xs text-gray-500 uppercase tracking-wide mb-1">Added By</label>
+                        <div id="view-task-creator" class="flex items-center gap-2">
+                            <!-- Filled by JS -->
+                        </div>
+                    </div>
+                    
+                    <!-- Time Added -->
+                    <div>
+                        <label class="block text-xs text-gray-500 uppercase tracking-wide mb-1">Added</label>
+                        <p id="view-task-time" class="text-white text-sm"></p>
+                    </div>
+                    
+                    <!-- Status -->
+                    <div>
+                        <label class="block text-xs text-gray-500 uppercase tracking-wide mb-1">Status</label>
+                        <p id="view-task-status" class="text-white text-sm"></p>
+                    </div>
+                    
+                    <!-- Priority -->
+                    <div>
+                        <label class="block text-xs text-gray-500 uppercase tracking-wide mb-1">Priority</label>
+                        <p id="view-task-priority" class="text-white text-sm capitalize"></p>
+                    </div>
+                </div>
+                
+                <!-- Assigned Agent -->
+                <div id="view-task-assigned-container" class="hidden pt-2 border-t border-gray-700">
+                    <label class="block text-xs text-gray-500 uppercase tracking-wide mb-1">Assigned To</label>
+                    <div id="view-task-assigned" class="flex items-center gap-2">
+                        <!-- Filled by JS -->
+                    </div>
+                </div>
+            </div>
+            <div class="px-6 py-4 border-t border-gray-700 flex gap-3">
+                <button type="button" onclick="closeTaskViewModal()"
+                        class="flex-1 bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                    Close
+                </button>
+                <button type="button" onclick="editCurrentTask()"
+                        class="flex-1 bg-modo-purple hover:bg-purple-600 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                    Edit Task
+                </button>
+                <button type="button" onclick="completeCurrentTask()"
+                        class="flex-1 bg-modo-green hover:bg-green-600 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                    ✓ Complete
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="delete-modal" class="fixed inset-0 bg-black bg-opacity-60 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-modo-card rounded-xl max-w-sm w-full border border-red-900/50 shadow-2xl p-6">
+            <div class="text-center mb-4">
+                <div class="w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-semibold text-white">Delete Task?</h3>
+                <p class="text-gray-400 text-sm mt-2">This action cannot be undone.</p>
+            </div>
+            <div class="flex gap-3">
+                <button onclick="closeDeleteModal()"
+                        class="flex-1 bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                    Cancel
+                </button>
+                <button id="confirm-delete-btn"
+                        class="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                    Delete
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/dashboard.js?v=7"></script>
+</body>
+</html>

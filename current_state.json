@@ -1,0 +1,1412 @@
+{
+  "timestamp": "2026-01-31T09:31:36.999685+00:00",
+  "collector_version": "1.0.0",
+  "context_usage_percent": 44.38,
+  "sessions": {
+    "timestamp": "2026-01-31T09:31:36.998164+00:00",
+    "active_sessions": [
+      {
+        "session_key": "agent:main:main",
+        "session_id": "0ac1e102-8546-4489-b6d2-ce8951d76df6",
+        "model": "kimi-for-coding",
+        "model_provider": "kimi-code",
+        "channel": "telegram",
+        "label": null,
+        "spawned_by": null,
+        "total_tokens": 88763,
+        "input_tokens": 88763,
+        "output_tokens": 29,
+        "context_tokens": 200000,
+        "compaction_count": 0,
+        "last_updated": "2026-01-31T09:31:21.020000+00:00",
+        "paused": false,
+        "context_usage_percent": 44.38
+      },
+      {
+        "session_key": "agent:main:cron:eb2c9c4b-cf3b-410c-81f7-bef30aecd158",
+        "session_id": "de364eda-97cc-467e-8ba7-a53845e93ce8",
+        "model": "MiniMax-M2.1",
+        "model_provider": "minimax",
+        "channel": "unknown",
+        "label": null,
+        "spawned_by": null,
+        "total_tokens": 26810,
+        "input_tokens": 11991,
+        "output_tokens": 201,
+        "context_tokens": 204800,
+        "compaction_count": 0,
+        "last_updated": "2026-01-31T09:00:00.072000+00:00",
+        "paused": false,
+        "context_usage_percent": 13.09
+      },
+      {
+        "session_key": "agent:main:cron:f4cbac4c-2557-49f4-8bfe-a9119cb6621e",
+        "session_id": "96675361-0603-4ba5-995a-7ad9ff8e3d2a",
+        "model": "MiniMax-M2.1",
+        "model_provider": "minimax",
+        "channel": "unknown",
+        "label": null,
+        "spawned_by": null,
+        "total_tokens": 15411,
+        "input_tokens": 638,
+        "output_tokens": 298,
+        "context_tokens": 204800,
+        "compaction_count": 0,
+        "last_updated": "2026-01-30T15:21:00.127000+00:00",
+        "paused": false,
+        "context_usage_percent": 7.52
+      },
+      {
+        "session_key": "agent:main:cron:8a2beb60-9317-401e-b352-8ff5f08db8ba",
+        "session_id": "4dd34a20-80e5-4540-86fc-0009a6f77420",
+        "model": "kimi-for-coding",
+        "model_provider": "kimi-code",
+        "channel": "unknown",
+        "label": null,
+        "spawned_by": null,
+        "total_tokens": 14063,
+        "input_tokens": 14063,
+        "output_tokens": 235,
+        "context_tokens": 200000,
+        "compaction_count": 0,
+        "last_updated": "2026-01-30T21:00:00.091000+00:00",
+        "paused": false,
+        "context_usage_percent": 7.03
+      },
+      {
+        "session_key": "agent:main:cron:b48d935e-d4e5-4168-a759-457bb1ff87e4",
+        "session_id": "a98040af-45ed-4f87-acc3-49543dd1c50d",
+        "model": "kimi-for-coding",
+        "model_provider": "kimi-code",
+        "channel": "unknown",
+        "label": null,
+        "spawned_by": null,
+        "total_tokens": 20834,
+        "input_tokens": 20834,
+        "output_tokens": 608,
+        "context_tokens": 200000,
+        "compaction_count": 0,
+        "last_updated": "2026-01-31T04:00:00.134000+00:00",
+        "paused": false,
+        "context_usage_percent": 10.42
+      },
+      {
+        "session_key": "agent:main:cron:cbccdc68-f3ca-4823-8375-ed53f5dc34af",
+        "session_id": "1892f41b-a8ba-4f95-aeb5-b32d6e0d5827",
+        "model": "kimi-for-coding",
+        "model_provider": "kimi-code",
+        "channel": "unknown",
+        "label": null,
+        "spawned_by": null,
+        "total_tokens": 12809,
+        "input_tokens": 12809,
+        "output_tokens": 170,
+        "context_tokens": 200000,
+        "compaction_count": 0,
+        "last_updated": "2026-01-31T08:00:00.142000+00:00",
+        "paused": false,
+        "context_usage_percent": 6.4
+      },
+      {
+        "session_key": "agent:main:subagent:fc5cc39c-7950-493e-af61-f3403227685c",
+        "session_id": "699dc3b7-2727-4d2c-b3eb-672ee5d486f9",
+        "model": "kimi-for-coding",
+        "model_provider": "kimi-code",
+        "channel": "telegram",
+        "label": "dashboard-metrics-review",
+        "spawned_by": "agent:main:main",
+        "total_tokens": 40972,
+        "input_tokens": 40972,
+        "output_tokens": 755,
+        "context_tokens": 200000,
+        "compaction_count": 0,
+        "last_updated": "2026-01-31T09:14:58.284000+00:00",
+        "paused": false,
+        "context_usage_percent": 20.49
+      },
+      {
+        "session_key": "agent:main:subagent:b748ac6f-12d0-45a0-b189-768255d51a13",
+        "session_id": "6f891a44-f6ae-4e57-a729-7df68522a2a3",
+        "model": "kimi-for-coding",
+        "model_provider": "kimi-code",
+        "channel": "telegram",
+        "label": "agent-comm-debug",
+        "spawned_by": "agent:main:main",
+        "total_tokens": 72247,
+        "input_tokens": 72247,
+        "output_tokens": 515,
+        "context_tokens": 200000,
+        "compaction_count": 0,
+        "last_updated": "2026-01-31T09:18:00.364000+00:00",
+        "paused": false,
+        "context_usage_percent": 36.12
+      }
+    ],
+    "total_sessions": 8,
+    "total_tokens": 291909,
+    "errors": [],
+    "paused_agents": [
+      "agent:main:subagent:14af7cc0-219d-4bb6-91bd-770534b38ae3"
+    ]
+  },
+  "memory": {
+    "timestamp": "2026-01-31T09:31:36.999690+00:00",
+    "recent_files": [
+      {
+        "filename": "moltbook-scan.md",
+        "modified": "2026-01-31T09:01:09.719396+00:00",
+        "size_bytes": 3034,
+        "has_session_header": false,
+        "has_tasks": false,
+        "task_count": 0,
+        "completed_count": 0,
+        "open_loops_count": 0,
+        "decisions_count": 0,
+        "summary": null
+      },
+      {
+        "filename": "2026-01-31.md",
+        "modified": "2026-01-31T08:45:57.003076+00:00",
+        "size_bytes": 1054,
+        "has_session_header": true,
+        "has_tasks": false,
+        "task_count": 0,
+        "completed_count": 0,
+        "open_loops_count": 6,
+        "decisions_count": 6,
+        "summary": null
+      },
+      {
+        "filename": "2026-01-31-0842.md",
+        "modified": "2026-01-31T08:42:44.186603+00:00",
+        "size_bytes": 6975,
+        "has_session_header": true,
+        "has_tasks": false,
+        "task_count": 0,
+        "completed_count": 0,
+        "open_loops_count": 0,
+        "decisions_count": 0,
+        "summary": "user: [Telegram Chris (@chrisgwynne) id:540474801 +36s 2026-01-31 08:29 GMT] Why do you have no memories of the build?\n[message_id: 2563]\nassistant: Because **memory search is broken** \u2014 OpenAI API ke"
+      },
+      {
+        "filename": "2026-01-31-0038.md",
+        "modified": "2026-01-31T00:38:19.928633+00:00",
+        "size_bytes": 3698,
+        "has_session_header": true,
+        "has_tasks": false,
+        "task_count": 0,
+        "completed_count": 0,
+        "open_loops_count": 0,
+        "decisions_count": 0,
+        "summary": "assistant: Let me also fix the text color to make sure it's visible:\nassistant: Server restarted with debugging."
+      },
+      {
+        "filename": "self-review.md",
+        "modified": "2026-01-31T00:31:45.434419+00:00",
+        "size_bytes": 1345,
+        "has_session_header": false,
+        "has_tasks": false,
+        "task_count": 0,
+        "completed_count": 0,
+        "open_loops_count": 0,
+        "decisions_count": 0,
+        "summary": null
+      },
+      {
+        "filename": "2026-01-30-2309.md",
+        "modified": "2026-01-30T23:09:09.297450+00:00",
+        "size_bytes": 5567,
+        "has_session_header": true,
+        "has_tasks": false,
+        "task_count": 0,
+        "completed_count": 0,
+        "open_loops_count": 0,
+        "decisions_count": 0,
+        "summary": "user: [Telegram Chris (@chrisgwynne) id:540474801 +4m 2026-01-30 22:55 GMT] Agents should shut down when done. They should clear from active agents. Theres an auto toggle in headrr that does nothing. "
+      },
+      {
+        "filename": "2026-01-30.md",
+        "modified": "2026-01-30T23:06:31.533673+00:00",
+        "size_bytes": 800,
+        "has_session_header": true,
+        "has_tasks": false,
+        "task_count": 0,
+        "completed_count": 0,
+        "open_loops_count": 5,
+        "decisions_count": 5,
+        "summary": null
+      },
+      {
+        "filename": "2026-01-30-2125.md",
+        "modified": "2026-01-30T21:25:39.448289+00:00",
+        "size_bytes": 4422,
+        "has_session_header": true,
+        "has_tasks": false,
+        "task_count": 0,
+        "completed_count": 0,
+        "open_loops_count": 0,
+        "decisions_count": 0,
+        "summary": "assistant: Hey! \ud83d\udc4b Just came online \u2014 I see there's a Moltbook scan issue (API timing out), but that's background noise unless you want to fix it now."
+      },
+      {
+        "filename": "2026-01-30-2105.md",
+        "modified": "2026-01-30T21:05:45.039937+00:00",
+        "size_bytes": 5061,
+        "has_session_header": true,
+        "has_tasks": false,
+        "task_count": 0,
+        "completed_count": 0,
+        "open_loops_count": 0,
+        "decisions_count": 0,
+        "summary": "user: [Telegram Chris (@chrisgwynne) id:540474801 +1m 2026-01-30 20:54 GMT] Context %\n[message_id: 2380]\nassistant: **16%** (31k/200k)\nuser: [Telegram Chris (@chrisgwynne) id:540474801 +15s 2026-01-30"
+      },
+      {
+        "filename": "2026-01-30-2028.md",
+        "modified": "2026-01-30T20:28:53.101491+00:00",
+        "size_bytes": 3756,
+        "has_session_header": true,
+        "has_tasks": true,
+        "task_count": 1,
+        "completed_count": 0,
+        "open_loops_count": 0,
+        "decisions_count": 0,
+        "summary": "assistant: Yes, it's ready for ClawdHub. Requirements:"
+      },
+      {
+        "filename": "moltbook-engagement-2026-01-30.md",
+        "modified": "2026-01-30T16:15:14.075503+00:00",
+        "size_bytes": 2451,
+        "has_session_header": false,
+        "has_tasks": false,
+        "task_count": 0,
+        "completed_count": 0,
+        "open_loops_count": 0,
+        "decisions_count": 0,
+        "summary": null
+      },
+      {
+        "filename": "2026-01-30-1609.md",
+        "modified": "2026-01-30T16:09:23.073005+00:00",
+        "size_bytes": 2717,
+        "has_session_header": true,
+        "has_tasks": false,
+        "task_count": 0,
+        "completed_count": 0,
+        "open_loops_count": 0,
+        "decisions_count": 0,
+        "summary": "assistant: \u2705 New session started \u00b7 model: kimi-code/kimi-for-coding\nuser: A new session was started via /new or /reset. Say hi briefly (1-2 sentences) and ask what the user wants to do next. If the ru"
+      },
+      {
+        "filename": "2026-01-30-1606.md",
+        "modified": "2026-01-30T16:06:51.676110+00:00",
+        "size_bytes": 3923,
+        "has_session_header": true,
+        "has_tasks": false,
+        "task_count": 0,
+        "completed_count": 0,
+        "open_loops_count": 0,
+        "decisions_count": 0,
+        "summary": "assistant: Context at 60%+ \u2014 consider compact or new session.\nuser: compact\n[message_id: 9cf75c3c-1f3d-43de-8edc-1d70593cb107]\nassistant: Gateway restarted with compaction enabled. Let me check if con"
+      },
+      {
+        "filename": "2026-01-30-1205.md",
+        "modified": "2026-01-30T12:05:49.487898+00:00",
+        "size_bytes": 239,
+        "has_session_header": true,
+        "has_tasks": false,
+        "task_count": 0,
+        "completed_count": 0,
+        "open_loops_count": 0,
+        "decisions_count": 0,
+        "summary": "assistant: There's a duplicate function. Let me check and fix:"
+      },
+      {
+        "filename": "2026-01-30-1117.md",
+        "modified": "2026-01-30T11:17:34.491829+00:00",
+        "size_bytes": 149,
+        "has_session_header": true,
+        "has_tasks": false,
+        "task_count": 0,
+        "completed_count": 0,
+        "open_loops_count": 0,
+        "decisions_count": 0,
+        "summary": null
+      },
+      {
+        "filename": "2026-01-30-1041.md",
+        "modified": "2026-01-30T10:41:54.984820+00:00",
+        "size_bytes": 1856,
+        "has_session_header": true,
+        "has_tasks": false,
+        "task_count": 0,
+        "completed_count": 0,
+        "open_loops_count": 0,
+        "decisions_count": 0,
+        "summary": "assistant: Dashboard fixed. APIs are now returning real data:"
+      },
+      {
+        "filename": "2026-01-30-0922.md",
+        "modified": "2026-01-30T09:22:35.107974+00:00",
+        "size_bytes": 1892,
+        "has_session_header": true,
+        "has_tasks": false,
+        "task_count": 0,
+        "completed_count": 0,
+        "open_loops_count": 0,
+        "decisions_count": 0,
+        "summary": "user: System: [2026-01-30 09:20:00 GMT] Check session context usage. If >60%, message Chris on Telegram: 'Context at 60%+ - consider compact or new session.'\nSystem: [2026-01-30 09:21:07 GMT] Exec com"
+      },
+      {
+        "filename": "night-shift-pattern.md",
+        "modified": "2026-01-30T09:16:10.799720+00:00",
+        "size_bytes": 1786,
+        "has_session_header": false,
+        "has_tasks": false,
+        "task_count": 0,
+        "completed_count": 0,
+        "open_loops_count": 0,
+        "decisions_count": 0,
+        "summary": null
+      },
+      {
+        "filename": "pull_request_feature_moltbook-actionable-tag.md",
+        "modified": "2026-01-30T01:03:20.463193+00:00",
+        "size_bytes": 1057,
+        "has_session_header": false,
+        "has_tasks": false,
+        "task_count": 0,
+        "completed_count": 0,
+        "open_loops_count": 0,
+        "decisions_count": 0,
+        "summary": null
+      },
+      {
+        "filename": "INDEX.md",
+        "modified": "2026-01-30T00:33:42.332215+00:00",
+        "size_bytes": 336,
+        "has_session_header": false,
+        "has_tasks": false,
+        "task_count": 0,
+        "completed_count": 0,
+        "open_loops_count": 0,
+        "decisions_count": 0,
+        "summary": null
+      }
+    ],
+    "task_summary": {
+      "total_tasks": 1,
+      "completed_tasks": 0,
+      "in_progress_tasks": 1
+    },
+    "errors": [],
+    "total_memory_files": 40
+  },
+  "git": {
+    "timestamp": "2026-01-31T09:31:37.000894+00:00",
+    "commits": [
+      {
+        "hash": "f8579ad27aca8deb21ce5a944e50c6b6424ea9f6",
+        "short_hash": "f8579ad",
+        "message": "feat(memory-flush): Add session-capture helper for meaningful flushes",
+        "author": "Chris",
+        "timestamp": "2026-01-31T01:01:55+00:00",
+        "relative_time": "9 hours ago"
+      },
+      {
+        "hash": "61837cc5c6ff7a88b234ad7255a78bd30ac3590b",
+        "short_hash": "61837cc",
+        "message": "feat(moltbook): Auto-tag actionable posts in scan output",
+        "author": "Chris",
+        "timestamp": "2026-01-30T01:02:52+00:00",
+        "relative_time": "32 hours ago"
+      },
+      {
+        "hash": "5aafc21f9ce7b7ebc667b2a66c2f82443080d544",
+        "short_hash": "5aafc21",
+        "message": "compound: daily review 2026-01-29",
+        "author": "Chris",
+        "timestamp": "2026-01-29T22:30:45+00:00",
+        "relative_time": "35 hours ago"
+      },
+      {
+        "hash": "745e8877c819c0c262e21caae7a2852880e80f51",
+        "short_hash": "745e887",
+        "message": "compound: daily review 2026-01-29",
+        "author": "Chris",
+        "timestamp": "2026-01-29T18:21:19+00:00",
+        "relative_time": "2 days ago"
+      },
+      {
+        "hash": "bb87dddca95f834cb9f368c5f5101cfa37e134f0",
+        "short_hash": "bb87ddd",
+        "message": "Added Gemini models to session notes",
+        "author": "Chris",
+        "timestamp": "2026-01-27T13:15:56+00:00",
+        "relative_time": "4 days ago"
+      },
+      {
+        "hash": "64f7616b3d67b4438c26335ae465373c58499106",
+        "short_hash": "64f7616",
+        "message": "Session notes 2026-01-27: node pairing, OpenAI models, skills",
+        "author": "Chris",
+        "timestamp": "2026-01-27T13:10:33+00:00",
+        "relative_time": "4 days ago"
+      },
+      {
+        "hash": "369bb24127515042a5c5dfe67458b3559435598a",
+        "short_hash": "369bb24",
+        "message": "Auto: 2026-01-27 06:00; 15 file(s) updated",
+        "author": "Chris",
+        "timestamp": "2026-01-27T06:00:01+00:00",
+        "relative_time": "4 days ago"
+      }
+    ],
+    "branch": "feature/session-state-capture",
+    "errors": [],
+    "total_commits": 7,
+    "total_commit_count": 7,
+    "uncommitted_changes": 77
+  },
+  "system": {
+    "timestamp": "2026-01-31T09:31:37.014599+00:00",
+    "cpu": {
+      "percent": 8.21,
+      "cores": 4
+    },
+    "memory": {
+      "total_mb": 15767.32,
+      "used_mb": 7876.21,
+      "available_mb": 7891.1,
+      "percent_used": 49.95,
+      "total_gb": 15.4,
+      "used_gb": 7.7
+    },
+    "disk": {
+      "total_gb": 467.35,
+      "used_gb": 36.19,
+      "available_gb": 407.35,
+      "percent_used": 9,
+      "filesystem": "/dev/sda2",
+      "mount_point": "/"
+    },
+    "errors": [],
+    "uptime_seconds": 145853.63,
+    "cpu_percent": 8.21
+  },
+  "skills": {
+    "timestamp": "2026-01-31T09:31:37.016915+00:00",
+    "bundled_count": 11,
+    "workspace_count": 21,
+    "total_count": 32,
+    "skills": [
+      {
+        "name": "bird",
+        "description": "X/Twitter CLI for reading, searching, posting, and engagement via cookies.",
+        "source": "openclaw-bundled",
+        "path": "/home/chris/.npm-global/lib/node_modules/openclaw/skills/bird/SKILL.md"
+      },
+      {
+        "name": "clawdhub",
+        "description": "Use the ClawdHub CLI to search, install, update, and publish agent skills from clawdhub.com. Use when you need to fetch new skills on the fly, sync installed skills to latest or a specific version, or publish new/updated skill folders with the npm-installed clawdhub CLI.",
+        "source": "openclaw-bundled",
+        "path": "/home/chris/.npm-global/lib/node_modules/openclaw/skills/clawdhub/SKILL.md"
+      },
+      {
+        "name": "gemini",
+        "description": "Gemini CLI for one-shot Q&A, summaries, and generation.",
+        "source": "openclaw-bundled",
+        "path": "/home/chris/.npm-global/lib/node_modules/openclaw/skills/gemini/SKILL.md"
+      },
+      {
+        "name": "gifgrep",
+        "description": "Search GIF providers with CLI/TUI, download results, and extract stills/sheets.",
+        "source": "openclaw-bundled",
+        "path": "/home/chris/.npm-global/lib/node_modules/openclaw/skills/gifgrep/SKILL.md"
+      },
+      {
+        "name": "github",
+        "description": "Interact with GitHub using the `gh` CLI. Use `gh issue`, `gh pr`, `gh run`, and `gh api` for issues, PRs, CI runs, and advanced queries.",
+        "source": "openclaw-workspace",
+        "path": "/home/chris/clawd/skills/github/SKILL.md"
+      },
+      {
+        "name": "gog",
+        "description": "Google Workspace CLI for Gmail, Calendar, Drive, Contacts, Sheets, and Docs.",
+        "source": "openclaw-bundled",
+        "path": "/home/chris/.npm-global/lib/node_modules/openclaw/skills/gog/SKILL.md"
+      },
+      {
+        "name": "himalaya",
+        "description": "CLI to manage emails via IMAP/SMTP. Use `himalaya` to list, read, write, reply, forward, search, and organize emails from the terminal. Supports multiple accounts and message composition with MML (MIME Meta Language).",
+        "source": "openclaw-workspace",
+        "path": "/home/chris/clawd/skills/himalaya/SKILL.md"
+      },
+      {
+        "name": "mcporter",
+        "description": "Use the mcporter CLI to list, configure, auth, and call MCP servers/tools directly (HTTP or stdio), including ad-hoc servers, config edits, and CLI/type generation.",
+        "source": "openclaw-bundled",
+        "path": "/home/chris/.npm-global/lib/node_modules/openclaw/skills/mcporter/SKILL.md"
+      },
+      {
+        "name": "nano-pdf",
+        "description": "Edit PDFs with natural-language instructions using the nano-pdf CLI.",
+        "source": "openclaw-workspace",
+        "path": "/home/chris/clawd/skills/nano-pdf/SKILL.md"
+      },
+      {
+        "name": "obsidian",
+        "description": "Work with Obsidian vaults (plain Markdown notes) and automate via obsidian-cli.",
+        "source": "openclaw-workspace",
+        "path": "/home/chris/clawd/skills/obsidian/SKILL.md"
+      },
+      {
+        "name": "openai-whisper",
+        "description": "Local speech-to-text with the Whisper CLI (no API key).",
+        "source": "openclaw-bundled",
+        "path": "/home/chris/.npm-global/lib/node_modules/openclaw/skills/openai-whisper/SKILL.md"
+      },
+      {
+        "name": "session-logs",
+        "description": "Search and analyze your own session logs (older/parent conversations) using jq.",
+        "source": "openclaw-bundled",
+        "path": "/home/chris/.npm-global/lib/node_modules/openclaw/skills/session-logs/SKILL.md"
+      },
+      {
+        "name": "skill-creator",
+        "description": "Create or update AgentSkills. Use when designing, structuring, or packaging skills with scripts, references, and assets.",
+        "source": "openclaw-bundled",
+        "path": "/home/chris/.npm-global/lib/node_modules/openclaw/skills/skill-creator/SKILL.md"
+      },
+      {
+        "name": "video-frames",
+        "description": "Extract frames or short clips from videos using ffmpeg.",
+        "source": "openclaw-bundled",
+        "path": "/home/chris/.npm-global/lib/node_modules/openclaw/skills/video-frames/SKILL.md"
+      },
+      {
+        "name": "wacli",
+        "description": "Send WhatsApp messages to other people or search/sync WhatsApp history via the wacli CLI (not for normal user chats).",
+        "source": "openclaw-workspace",
+        "path": "/home/chris/clawd/skills/wacli/SKILL.md"
+      },
+      {
+        "name": "weather",
+        "description": "Get current weather and forecasts (no API key required).",
+        "source": "openclaw-bundled",
+        "path": "/home/chris/.npm-global/lib/node_modules/openclaw/skills/weather/SKILL.md"
+      },
+      {
+        "name": "compound-engineering",
+        "description": "Make your AI agent learn and improve automatically. Reviews sessions, extracts learnings, updates memory files, and compounds knowledge over time. Set up nightly review loops that make your agent smarter every day.",
+        "source": "openclaw-workspace",
+        "path": "/home/chris/clawd/skills/ai-compound-1-0-1/SKILL.md"
+      },
+      {
+        "name": "answeroverflow",
+        "description": "Search indexed Discord community discussions via Answer Overflow. Find solutions to coding problems, library issues, and community Q&A that only exist in Discord conversations.",
+        "source": "openclaw-workspace",
+        "path": "/home/chris/clawd/skills/answeroverflow/SKILL.md"
+      },
+      {
+        "name": "auto-updater",
+        "description": "Automatically update Clawdbot and all installed skills once daily. Runs via cron, checks for updates, applies them, and messages the user with a summary of what changed.",
+        "source": "openclaw-workspace",
+        "path": "/home/chris/clawd/skills/auto-updater/SKILL.md"
+      },
+      {
+        "name": "clawdbot-logs",
+        "description": "Analyze Clawdbot logs and diagnostics. Use when the user asks about bot performance, response times, errors, session stats, token usage, API costs, or wants to debug slow responses.",
+        "source": "openclaw-workspace",
+        "path": "/home/chris/clawd/skills/clawdbot-logs/SKILL.md"
+      },
+      {
+        "name": "clawddocs",
+        "description": "Clawdbot documentation expert with decision tree navigation, search scripts, doc fetching, version tracking, and config snippets for all Clawdbot features",
+        "source": "openclaw-workspace",
+        "path": "/home/chris/clawd/skills/clawddocs/SKILL.md"
+      },
+      {
+        "name": "daily-review",
+        "description": "Comprehensive daily performance review with communication tracking, meeting analysis, output metrics, and focus time monitoring. Your AI performance coach.",
+        "source": "openclaw-workspace",
+        "path": "/home/chris/clawd/skills/daily-review/SKILL.md"
+      },
+      {
+        "name": "dont-hack-me",
+        "description": "\u5225\u99ed\u6211\uff01\u57fa\u672c\u5b89\u5168\u6aa2\u6e2c \u2014 Security self-check for Clawdbot/Moltbot. Run a quick audit of your clawdbot.json to catch dangerous misconfigurations \u2014 exposed gateway, missing auth, open DM policy, weak tokens, loose file permissions. Auto-fix included. Invoke: \"run a security check\" or \"\u5e6b\u6211\u505a\u5b89\u5168\u6aa2\u67e5\".",
+        "source": "openclaw-workspace",
+        "path": "/home/chris/clawd/skills/dont-hack-me/SKILL.md"
+      },
+      {
+        "name": "find-skills",
+        "description": "Helps users discover and install agent skills when they ask questions like \"how do I do X\", \"find a skill for X\", \"is there a skill that can...\", or express interest in extending capabilities. This skill should be used when the user is looking for functionality that might exist as an installable skill.",
+        "source": "openclaw-workspace",
+        "path": "/home/chris/clawd/skills/find-skills/SKILL.md"
+      },
+      {
+        "name": "habit-flow",
+        "description": "AI-powered atomic habit tracker with natural language logging, streak tracking, smart reminders, and coaching. Use for creating habits, logging completions naturally (\"I meditated today\"), viewing progress, and getting personalized coaching.",
+        "source": "openclaw-workspace",
+        "path": "/home/chris/clawd/skills/habit-flow-skill/SKILL.md"
+      },
+      {
+        "name": "message-queue",
+        "description": "Staggered message delivery queue for Clawdbot. Enqueue messages with priority and delay, deliver randomly over a time window. Use when messages should be sent sporadically over 1-2 hours instead of all at once.",
+        "source": "openclaw-workspace",
+        "path": "/home/chris/clawd/skills/message-queue/SKILL.md"
+      },
+      {
+        "name": "people-memories",
+        "description": "Capture short personal notes about people you mention, store them in a lightweight DB, and recall those details whenever you ask about them later. Use when you want to remember preferences, reminders, or the context around a person without digging through past chats.",
+        "source": "openclaw-workspace",
+        "path": "/home/chris/clawd/skills/people-memories/SKILL.md"
+      },
+      {
+        "name": "proactive-agent",
+        "description": "Transform AI agents from task-followers into proactive partners that anticipate needs and continuously improve. Includes memory architecture with pre-compaction flush (so context survives when the window fills), reverse prompting (surfaces ideas you didn't know to ask for), security hardening, self-healing patterns (diagnoses and fixes its own issues), and alignment systems (stays on mission, remembers who it serves). Battle-tested patterns for agents that learn from every interaction and create value without being asked.",
+        "source": "openclaw-workspace",
+        "path": "/home/chris/clawd/skills/proactive-agent/SKILL.md"
+      },
+      {
+        "name": "self-improvement",
+        "description": "Captures learnings, errors, and corrections to enable continuous improvement. Use when: (1) A command or operation fails unexpectedly, (2) User corrects Claude ('No, that's wrong...', 'Actually...'), (3) User requests a capability that doesn't exist, (4) An external API or tool fails, (5) Claude realizes its knowledge is outdated or incorrect, (6) A better approach is discovered for a recurring task. Also review learnings before major tasks.",
+        "source": "openclaw-workspace",
+        "path": "/home/chris/clawd/skills/self-improving-agent/SKILL.md"
+      },
+      {
+        "name": "telegram-usage",
+        "description": "Display session usage statistics (quota, session time, tokens, context)",
+        "source": "openclaw-workspace",
+        "path": "/home/chris/clawd/skills/telegram-usage/SKILL.md"
+      },
+      {
+        "name": "todoist",
+        "description": "Manage tasks and projects in Todoist. Use when user asks about tasks, to-dos, reminders, or productivity.",
+        "source": "openclaw-workspace",
+        "path": "/home/chris/clawd/skills/todoist/SKILL.md"
+      },
+      {
+        "name": "x-api",
+        "description": "Post to X (Twitter) using the official API with OAuth 1.0a. Use when you need to tweet, post updates, or publish content. Bypasses rate limits and bot detection that affect cookie-based approaches like bird CLI.",
+        "source": "openclaw-workspace",
+        "path": "/home/chris/clawd/skills/x-api/SKILL.md"
+      }
+    ],
+    "errors": []
+  },
+  "messages": [
+    {
+      "timestamp": "2026-01-31T09:23:25.366230+00:00",
+      "from": "main-agent",
+      "to": "subagent-fc5cc39c",
+      "message": "Spawned subagent for task: dashboard-metrics-review",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:23:25.366241+00:00",
+      "from": "main-agent",
+      "to": "subagent-b748ac6f",
+      "message": "Spawned subagent for task: agent-comm-debug",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:23:35.399846+00:00",
+      "from": "main-agent",
+      "to": "subagent-fc5cc39c",
+      "message": "Spawned subagent for task: dashboard-metrics-review",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:23:35.399858+00:00",
+      "from": "main-agent",
+      "to": "subagent-b748ac6f",
+      "message": "Spawned subagent for task: agent-comm-debug",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:23:45.434059+00:00",
+      "from": "main-agent",
+      "to": "subagent-fc5cc39c",
+      "message": "Spawned subagent for task: dashboard-metrics-review",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:23:45.434071+00:00",
+      "from": "main-agent",
+      "to": "subagent-b748ac6f",
+      "message": "Spawned subagent for task: agent-comm-debug",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:23:55.464510+00:00",
+      "from": "main-agent",
+      "to": "subagent-fc5cc39c",
+      "message": "Spawned subagent for task: dashboard-metrics-review",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:23:55.464521+00:00",
+      "from": "main-agent",
+      "to": "subagent-b748ac6f",
+      "message": "Spawned subagent for task: agent-comm-debug",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:24:05.499568+00:00",
+      "from": "main-agent",
+      "to": "subagent-fc5cc39c",
+      "message": "Spawned subagent for task: dashboard-metrics-review",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:24:05.499596+00:00",
+      "from": "main-agent",
+      "to": "subagent-b748ac6f",
+      "message": "Spawned subagent for task: agent-comm-debug",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:24:15.537146+00:00",
+      "from": "main-agent",
+      "to": "subagent-fc5cc39c",
+      "message": "Spawned subagent for task: dashboard-metrics-review",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:24:15.537157+00:00",
+      "from": "main-agent",
+      "to": "subagent-b748ac6f",
+      "message": "Spawned subagent for task: agent-comm-debug",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:24:25.567522+00:00",
+      "from": "main-agent",
+      "to": "subagent-fc5cc39c",
+      "message": "Spawned subagent for task: dashboard-metrics-review",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:24:25.567534+00:00",
+      "from": "main-agent",
+      "to": "subagent-b748ac6f",
+      "message": "Spawned subagent for task: agent-comm-debug",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:24:35.600431+00:00",
+      "from": "main-agent",
+      "to": "subagent-fc5cc39c",
+      "message": "Spawned subagent for task: dashboard-metrics-review",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:24:35.600443+00:00",
+      "from": "main-agent",
+      "to": "subagent-b748ac6f",
+      "message": "Spawned subagent for task: agent-comm-debug",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:24:45.635989+00:00",
+      "from": "main-agent",
+      "to": "subagent-fc5cc39c",
+      "message": "Spawned subagent for task: dashboard-metrics-review",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:24:45.636001+00:00",
+      "from": "main-agent",
+      "to": "subagent-b748ac6f",
+      "message": "Spawned subagent for task: agent-comm-debug",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:24:55.669258+00:00",
+      "from": "main-agent",
+      "to": "subagent-fc5cc39c",
+      "message": "Spawned subagent for task: dashboard-metrics-review",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:24:55.669269+00:00",
+      "from": "main-agent",
+      "to": "subagent-b748ac6f",
+      "message": "Spawned subagent for task: agent-comm-debug",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:25:05.701371+00:00",
+      "from": "main-agent",
+      "to": "subagent-fc5cc39c",
+      "message": "Spawned subagent for task: dashboard-metrics-review",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:25:05.701382+00:00",
+      "from": "main-agent",
+      "to": "subagent-b748ac6f",
+      "message": "Spawned subagent for task: agent-comm-debug",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:25:15.735876+00:00",
+      "from": "main-agent",
+      "to": "subagent-fc5cc39c",
+      "message": "Spawned subagent for task: dashboard-metrics-review",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:25:15.735904+00:00",
+      "from": "main-agent",
+      "to": "subagent-b748ac6f",
+      "message": "Spawned subagent for task: agent-comm-debug",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:25:25.773618+00:00",
+      "from": "main-agent",
+      "to": "subagent-fc5cc39c",
+      "message": "Spawned subagent for task: dashboard-metrics-review",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:25:25.773629+00:00",
+      "from": "main-agent",
+      "to": "subagent-b748ac6f",
+      "message": "Spawned subagent for task: agent-comm-debug",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:25:35.808477+00:00",
+      "from": "main-agent",
+      "to": "subagent-fc5cc39c",
+      "message": "Spawned subagent for task: dashboard-metrics-review",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:25:35.808489+00:00",
+      "from": "main-agent",
+      "to": "subagent-b748ac6f",
+      "message": "Spawned subagent for task: agent-comm-debug",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:25:45.839875+00:00",
+      "from": "main-agent",
+      "to": "subagent-fc5cc39c",
+      "message": "Spawned subagent for task: dashboard-metrics-review",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:25:45.839887+00:00",
+      "from": "main-agent",
+      "to": "subagent-b748ac6f",
+      "message": "Spawned subagent for task: agent-comm-debug",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:25:55.872787+00:00",
+      "from": "main-agent",
+      "to": "subagent-fc5cc39c",
+      "message": "Spawned subagent for task: dashboard-metrics-review",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:25:55.872808+00:00",
+      "from": "main-agent",
+      "to": "subagent-b748ac6f",
+      "message": "Spawned subagent for task: agent-comm-debug",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:26:05.904261+00:00",
+      "from": "main-agent",
+      "to": "subagent-fc5cc39c",
+      "message": "Spawned subagent for task: dashboard-metrics-review",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:26:05.904269+00:00",
+      "from": "main-agent",
+      "to": "subagent-b748ac6f",
+      "message": "Spawned subagent for task: agent-comm-debug",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:26:15.938158+00:00",
+      "from": "main-agent",
+      "to": "subagent-fc5cc39c",
+      "message": "Spawned subagent for task: dashboard-metrics-review",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:26:15.938165+00:00",
+      "from": "main-agent",
+      "to": "subagent-b748ac6f",
+      "message": "Spawned subagent for task: agent-comm-debug",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:26:25.971006+00:00",
+      "from": "main-agent",
+      "to": "subagent-fc5cc39c",
+      "message": "Spawned subagent for task: dashboard-metrics-review",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:26:25.971013+00:00",
+      "from": "main-agent",
+      "to": "subagent-b748ac6f",
+      "message": "Spawned subagent for task: agent-comm-debug",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:26:36.004148+00:00",
+      "from": "main-agent",
+      "to": "subagent-fc5cc39c",
+      "message": "Spawned subagent for task: dashboard-metrics-review",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:26:36.004156+00:00",
+      "from": "main-agent",
+      "to": "subagent-b748ac6f",
+      "message": "Spawned subagent for task: agent-comm-debug",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:26:46.038474+00:00",
+      "from": "main-agent",
+      "to": "subagent-fc5cc39c",
+      "message": "Spawned subagent for task: dashboard-metrics-review",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:26:46.038482+00:00",
+      "from": "main-agent",
+      "to": "subagent-b748ac6f",
+      "message": "Spawned subagent for task: agent-comm-debug",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:26:56.086530+00:00",
+      "from": "main-agent",
+      "to": "subagent-fc5cc39c",
+      "message": "Spawned subagent for task: dashboard-metrics-review",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:26:56.086542+00:00",
+      "from": "main-agent",
+      "to": "subagent-b748ac6f",
+      "message": "Spawned subagent for task: agent-comm-debug",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:27:06.117879+00:00",
+      "from": "main-agent",
+      "to": "subagent-fc5cc39c",
+      "message": "Spawned subagent for task: dashboard-metrics-review",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:27:06.117890+00:00",
+      "from": "main-agent",
+      "to": "subagent-b748ac6f",
+      "message": "Spawned subagent for task: agent-comm-debug",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:27:16.150957+00:00",
+      "from": "main-agent",
+      "to": "subagent-fc5cc39c",
+      "message": "Spawned subagent for task: dashboard-metrics-review",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:27:16.150968+00:00",
+      "from": "main-agent",
+      "to": "subagent-b748ac6f",
+      "message": "Spawned subagent for task: agent-comm-debug",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:27:26.183569+00:00",
+      "from": "main-agent",
+      "to": "subagent-fc5cc39c",
+      "message": "Spawned subagent for task: dashboard-metrics-review",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:27:26.183580+00:00",
+      "from": "main-agent",
+      "to": "subagent-b748ac6f",
+      "message": "Spawned subagent for task: agent-comm-debug",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:27:36.216591+00:00",
+      "from": "main-agent",
+      "to": "subagent-fc5cc39c",
+      "message": "Spawned subagent for task: dashboard-metrics-review",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:27:36.216603+00:00",
+      "from": "main-agent",
+      "to": "subagent-b748ac6f",
+      "message": "Spawned subagent for task: agent-comm-debug",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:27:46.249421+00:00",
+      "from": "main-agent",
+      "to": "subagent-fc5cc39c",
+      "message": "Spawned subagent for task: dashboard-metrics-review",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:27:46.249432+00:00",
+      "from": "main-agent",
+      "to": "subagent-b748ac6f",
+      "message": "Spawned subagent for task: agent-comm-debug",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:27:56.282660+00:00",
+      "from": "main-agent",
+      "to": "subagent-fc5cc39c",
+      "message": "Spawned subagent for task: dashboard-metrics-review",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:27:56.282672+00:00",
+      "from": "main-agent",
+      "to": "subagent-b748ac6f",
+      "message": "Spawned subagent for task: agent-comm-debug",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:28:06.316708+00:00",
+      "from": "main-agent",
+      "to": "subagent-fc5cc39c",
+      "message": "Spawned subagent for task: dashboard-metrics-review",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:28:06.316720+00:00",
+      "from": "main-agent",
+      "to": "subagent-b748ac6f",
+      "message": "Spawned subagent for task: agent-comm-debug",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:28:16.349412+00:00",
+      "from": "main-agent",
+      "to": "subagent-fc5cc39c",
+      "message": "Spawned subagent for task: dashboard-metrics-review",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:28:16.349424+00:00",
+      "from": "main-agent",
+      "to": "subagent-b748ac6f",
+      "message": "Spawned subagent for task: agent-comm-debug",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:28:26.382303+00:00",
+      "from": "main-agent",
+      "to": "subagent-fc5cc39c",
+      "message": "Spawned subagent for task: dashboard-metrics-review",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:28:26.382315+00:00",
+      "from": "main-agent",
+      "to": "subagent-b748ac6f",
+      "message": "Spawned subagent for task: agent-comm-debug",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:28:36.416918+00:00",
+      "from": "main-agent",
+      "to": "subagent-fc5cc39c",
+      "message": "Spawned subagent for task: dashboard-metrics-review",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:28:36.416944+00:00",
+      "from": "main-agent",
+      "to": "subagent-b748ac6f",
+      "message": "Spawned subagent for task: agent-comm-debug",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:28:46.452036+00:00",
+      "from": "main-agent",
+      "to": "subagent-fc5cc39c",
+      "message": "Spawned subagent for task: dashboard-metrics-review",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:28:46.452048+00:00",
+      "from": "main-agent",
+      "to": "subagent-b748ac6f",
+      "message": "Spawned subagent for task: agent-comm-debug",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:28:56.485340+00:00",
+      "from": "main-agent",
+      "to": "subagent-fc5cc39c",
+      "message": "Spawned subagent for task: dashboard-metrics-review",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:28:56.485352+00:00",
+      "from": "main-agent",
+      "to": "subagent-b748ac6f",
+      "message": "Spawned subagent for task: agent-comm-debug",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:29:06.518687+00:00",
+      "from": "main-agent",
+      "to": "subagent-fc5cc39c",
+      "message": "Spawned subagent for task: dashboard-metrics-review",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:29:06.518699+00:00",
+      "from": "main-agent",
+      "to": "subagent-b748ac6f",
+      "message": "Spawned subagent for task: agent-comm-debug",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:29:16.552828+00:00",
+      "from": "main-agent",
+      "to": "subagent-fc5cc39c",
+      "message": "Spawned subagent for task: dashboard-metrics-review",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:29:16.552839+00:00",
+      "from": "main-agent",
+      "to": "subagent-b748ac6f",
+      "message": "Spawned subagent for task: agent-comm-debug",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:29:26.585579+00:00",
+      "from": "main-agent",
+      "to": "subagent-fc5cc39c",
+      "message": "Spawned subagent for task: dashboard-metrics-review",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:29:26.585586+00:00",
+      "from": "main-agent",
+      "to": "subagent-b748ac6f",
+      "message": "Spawned subagent for task: agent-comm-debug",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:29:36.618758+00:00",
+      "from": "main-agent",
+      "to": "subagent-fc5cc39c",
+      "message": "Spawned subagent for task: dashboard-metrics-review",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:29:36.618766+00:00",
+      "from": "main-agent",
+      "to": "subagent-b748ac6f",
+      "message": "Spawned subagent for task: agent-comm-debug",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:29:46.651300+00:00",
+      "from": "main-agent",
+      "to": "subagent-fc5cc39c",
+      "message": "Spawned subagent for task: dashboard-metrics-review",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:29:46.651312+00:00",
+      "from": "main-agent",
+      "to": "subagent-b748ac6f",
+      "message": "Spawned subagent for task: agent-comm-debug",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:29:56.685272+00:00",
+      "from": "main-agent",
+      "to": "subagent-fc5cc39c",
+      "message": "Spawned subagent for task: dashboard-metrics-review",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:29:56.685283+00:00",
+      "from": "main-agent",
+      "to": "subagent-b748ac6f",
+      "message": "Spawned subagent for task: agent-comm-debug",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:30:06.720736+00:00",
+      "from": "main-agent",
+      "to": "subagent-fc5cc39c",
+      "message": "Spawned subagent for task: dashboard-metrics-review",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:30:06.720744+00:00",
+      "from": "main-agent",
+      "to": "subagent-b748ac6f",
+      "message": "Spawned subagent for task: agent-comm-debug",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:30:16.751021+00:00",
+      "from": "main-agent",
+      "to": "subagent-fc5cc39c",
+      "message": "Spawned subagent for task: dashboard-metrics-review",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:30:16.751030+00:00",
+      "from": "main-agent",
+      "to": "subagent-b748ac6f",
+      "message": "Spawned subagent for task: agent-comm-debug",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:30:26.775542+00:00",
+      "from": "main-agent",
+      "to": "subagent-fc5cc39c",
+      "message": "Spawned subagent for task: dashboard-metrics-review",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:30:26.775553+00:00",
+      "from": "main-agent",
+      "to": "subagent-b748ac6f",
+      "message": "Spawned subagent for task: agent-comm-debug",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:30:36.806565+00:00",
+      "from": "main-agent",
+      "to": "subagent-fc5cc39c",
+      "message": "Spawned subagent for task: dashboard-metrics-review",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:30:36.806573+00:00",
+      "from": "main-agent",
+      "to": "subagent-b748ac6f",
+      "message": "Spawned subagent for task: agent-comm-debug",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:30:46.835043+00:00",
+      "from": "main-agent",
+      "to": "subagent-fc5cc39c",
+      "message": "Spawned subagent for task: dashboard-metrics-review",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:30:46.835051+00:00",
+      "from": "main-agent",
+      "to": "subagent-b748ac6f",
+      "message": "Spawned subagent for task: agent-comm-debug",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:30:56.861313+00:00",
+      "from": "main-agent",
+      "to": "subagent-fc5cc39c",
+      "message": "Spawned subagent for task: dashboard-metrics-review",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:30:56.861340+00:00",
+      "from": "main-agent",
+      "to": "subagent-b748ac6f",
+      "message": "Spawned subagent for task: agent-comm-debug",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:31:06.896539+00:00",
+      "from": "main-agent",
+      "to": "subagent-fc5cc39c",
+      "message": "Spawned subagent for task: dashboard-metrics-review",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:31:06.896551+00:00",
+      "from": "main-agent",
+      "to": "subagent-b748ac6f",
+      "message": "Spawned subagent for task: agent-comm-debug",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:31:16.930372+00:00",
+      "from": "main-agent",
+      "to": "subagent-fc5cc39c",
+      "message": "Spawned subagent for task: dashboard-metrics-review",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:31:16.930384+00:00",
+      "from": "main-agent",
+      "to": "subagent-b748ac6f",
+      "message": "Spawned subagent for task: agent-comm-debug",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:31:26.964589+00:00",
+      "from": "main-agent",
+      "to": "subagent-fc5cc39c",
+      "message": "Spawned subagent for task: dashboard-metrics-review",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:31:26.964596+00:00",
+      "from": "main-agent",
+      "to": "subagent-b748ac6f",
+      "message": "Spawned subagent for task: agent-comm-debug",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:31:36.996998+00:00",
+      "from": "main-agent",
+      "to": "subagent-fc5cc39c",
+      "message": "Spawned subagent for task: dashboard-metrics-review",
+      "type": "spawn"
+    },
+    {
+      "timestamp": "2026-01-31T09:31:36.997005+00:00",
+      "from": "main-agent",
+      "to": "subagent-b748ac6f",
+      "message": "Spawned subagent for task: agent-comm-debug",
+      "type": "spawn"
+    }
+  ],
+  "success_rate": {
+    "rate": null,
+    "total": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": 0,
+    "message": "No data yet"
+  },
+  "agent_cleanup": {
+    "killed_count": 0,
+    "killed_agents": [],
+    "idle_timeout_minutes": 30
+  }
+}

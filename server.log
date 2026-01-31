@@ -1,0 +1,8 @@
+2026-01-31 09:16:03,418 - __main__ - INFO - Starting Clawdbot Dashboard server on 0.0.0.0:5000
+2026-01-31 09:16:03,418 - __main__ - INFO - State file: /home/chris/clawd/dashboard/current_state.json
+2026-01-31 09:16:03,418 - __main__ - INFO - Static folder: /home/chris/clawd/dashboard/static
+2026-01-31 09:16:03,418 - __main__ - INFO - Template folder: templates
+ * Serving Flask app 'server'
+ * Debug mode: off
+Address already in use
+Port 5000 is in use by another program. Either identify and stop that program, or start the server with a different port.
