@@ -9,37 +9,6 @@ let dragSourceElement = null;
 let deleteTaskId = null;
 let autoModeEnabled = true;
 
-// Friends TV show character names for sub-agents (66 characters)
-const FRIENDS_NAMES = [
-    "Rachel", "Ross", "Monica", "Chandler", "Joey", "Phoebe",
-    "Mike", "David", "Janice", "Gunther", "Richard", "Emily",
-    "Carol", "Susan", "Ben", "Emma", "Jack", "Judy",
-    "Estelle", "Frank", "Alice", "Ursula", "Tag", "Paul",
-    "Pete", "Kate", "Julie", "Charlie", "Kathy", "Elizabeth",
-    "Eddie", "MrHeckles", "Treeger", "Geller", "Tribbiani", "Buffay",
-    "Green", "Bing", "Geller2", "Hannigan", "Tyler", "Stevens",
-    "Will", "Jill", "Tim", "Tom", "Steve", "Mark",
-    "Gary", "Amy", "Eric", "Bob", "Dan", "Sam",
-    "Neil", "Rob", "Sean", "Pat", "Kim", "Joy",
-    "Zoe", "Max", "Leo", "Zack", "Cody", "UglyNakedGuy"
-];
-
-// Get a friendly Friends character name based on session key
-function getFriendsName(sessionKey) {
-    if (!sessionKey) return null;
-    
-    // Simple hash function to deterministically pick a name
-    let hash = 0;
-    for (let i = 0; i < sessionKey.length; i++) {
-        const char = sessionKey.charCodeAt(i);
-        hash = ((hash << 5) - hash) + char;
-        hash = hash & hash; // Convert to 32bit integer
-    }
-    
-    const index = Math.abs(hash) % FRIENDS_NAMES.length;
-    return FRIENDS_NAMES[index];
-}
-
 // Status mapping between frontend and backend
 const STATUS_MAP = {
     'inbox': 'Inbox',
@@ -362,9 +331,12 @@ function renderAgents(sessions) {
     // Update counts
     const totalEl = document.getElementById('agent-total');
     const activeEl = document.getElementById('agent-active');
+    const idleEl = document.getElementById('agent-idle');
     const activeCount = categorizedSessions.filter(s => s.status === 'ACTIVE').length;
+    const idleCount = categorizedSessions.filter(s => s.status === 'IDLE').length;
     if (totalEl) totalEl.textContent = categorizedSessions.length;
     if (activeEl) activeEl.textContent = activeCount;
+    if (idleEl) idleEl.textContent = idleCount;
     
     if (categorizedSessions.length === 0) {
         container.innerHTML = '<p class="text-modo-gray col-span-2">No active sessions</p>';
@@ -1351,4 +1323,20 @@ function showNotification(message, type = 'info') {
         notification.classList.add('translate-y-10', 'opacity-0');
         setTimeout(() => notification.remove(), 300);
     }, 3000);
+}
+
+// ==================== Emergency Stop ====================
+async function emergencyStopAll() {
+    if (!confirm('Stop all agents? This will terminate all subagent sessions.')) return;
+    try {
+        const response = await fetch(`${CONTROL_API_URL}/stop-all`, { method: 'POST' });
+        if (response.ok) {
+            showNotification('All agents stopped', 'success');
+        } else {
+            throw new Error(`HTTP ${response.status}`);
+        }
+    } catch (err) {
+        console.error('[Dashboard] Error stopping agents:', err);
+        showNotification('Failed to stop agents: ' + err.message, 'error');
+    }
 }
